@@ -103,7 +103,7 @@ def fit_T(data, state_centers, action_centers, goal_check):
                 break
             u = data[n]['u'][t]
             a = np.argmin(np.abs(u - action_centers))
-            T[a][all_s[t], all_s_next[t]] = T[a][all_s[t], all_s_next[t]] + 1
+            T[a][all_s[t], all_s_next[t]] += 1
     for a in range(n_actions):
         for s in range(n_states-1):
             if goal_check(state_centers[s]):
