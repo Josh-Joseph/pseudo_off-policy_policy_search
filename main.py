@@ -29,13 +29,13 @@ def evaluate_approach(method, problem, analysis, save_it=False):
         elif analysis == 'sample_complexity':
             all_wind = [.2]
             all_sig = [.01]
-            all_n = [10, 50, 100, 250, 500, 1000, 1500, 2000, 2500, 5000, 7500, 10000]
+            all_n = [10, 50, 100, 250, 500, 1000, 1500, 2000, 2500, 5000, 7500, 10000, 12500]
         domains = [cartpole.Cartpole((wind, sig)) for sig in all_sig for wind in all_wind]
     elif problem == 'mountaincar':
         if analysis == 'misspecification':
             # drag and noise on xdot
-            #all_drag_mu = [0, .001, .005, .01, .05, .1, .5]
-            all_drag_mu = [.01, .05, .1, .5]
+            #all_drag_mu = [0, .001, .005, .01, .05, .1, .5, 1, 5, 10 , 50]
+            all_drag_mu = [.5, 1, 5, 10 , 50]
             all_drag_sig = [.001]
             all_n = [1000]
         elif analysis == 'sample_complexity':
