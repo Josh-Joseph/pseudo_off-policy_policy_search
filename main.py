@@ -53,19 +53,19 @@ def evaluate_approach(method, problem, analysis, save_it=False):
         elif analysis == 'sample_complexity':
             all_wind = [.2]
             all_sig = [.01]
-            all_n = [50, 100, 250, 500, 1000, 1500, 2000, 2500, 5000, 7500, 10000]
+            all_n = [10, 50, 100, 250, 500, 1000, 1500, 2000, 2500, 5000, 7500, 10000]
         domains = [cartpole.Cartpole((wind, sig)) for sig in all_sig for wind in all_wind]
     elif problem == 'mountaincar':
         if analysis == 'misspecification':
             # drag and noise on xdot
-            all_drag_mu = [.1] #np.arange(0,1.1,.1)
+            all_drag_mu = [.25] #np.arange(0,1.1,.1)
             all_drag_sig = [0, .25, .5, .75, 1, 1.5, 2, 2.5, 3]
-            all_n = [2000]
+            all_n = [1000]
         elif analysis == 'sample_complexity':
             # drag and noise on xdot
-            all_drag_mu = np.arange(0,1.1,.1)
-            all_drag_sig = [.5, 1.5, 2, 2.5]
-            all_n = [50, 100, 200]#, 500, 1000, 2000]
+            all_drag_mu = [.1] #np.arange(0,1.1,.1)
+            all_drag_sig = [1]
+            all_n = [10, 50, 100, 150, 200, 250, 500, 1000, 1500, 2000]
         domains = [mountaincar.Mountaincar((drag_mu, drag_sig)) for drag_sig in all_drag_sig for drag_mu in all_drag_mu]
 
     print "[main.evaluate_approach]: Evaluating the performance of " + method + " ..."
