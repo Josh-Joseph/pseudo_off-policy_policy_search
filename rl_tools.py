@@ -88,22 +88,21 @@ def fit_T(data, state_centers, action_centers, goal_check):
     T = []
     for a in range(n_actions):
         T.append(scipy.sparse.lil_matrix((n_states, n_states)))
-    all_x = np.zeros((0, n_dims))
-    all_x_next = np.zeros((0, n_dims))
+    all_s = []
+    all_s_next = []
     for n in range(len(data)):
         nan_inds = np.where(np.isnan(data[n].values[:,0]))[0]
         first_nan = len(data[n].values[:,0]) if len(nan_inds) == 0 else nan_inds[0]
-        all_x = np.append(all_x, data[n].values[:first_nan-1,:-2], axis=0)
-        all_x_next = np.append(all_x_next, data[n].values[1:first_nan,:-2], axis=0)
-    trash, all_s = kdtree.query(all_x)
-    trash, all_s_next = kdtree.query(all_x_next)
+        trash, this_s = kdtree.query(data[n].values[:first_nan,:-2])
+        all_s.append(this_s[:-1])
+        all_s_next.append(this_s[1:])
     for n in range(len(data)):
         for t in range(len(data[n])-1):
             if np.isnan(data[n]['x'][t+1]):
                 break
             u = data[n]['u'][t]
             a = np.argmin(np.abs(u - action_centers))
-            T[a][all_s[t], all_s_next[t]] += 1
+            T[a][all_s[n][t], all_s_next[n][t]] += 1
     for a in range(n_actions):
         for s in range(n_states-1):
             if goal_check(state_centers[s]):
@@ -111,8 +110,7 @@ def fit_T(data, state_centers, action_centers, goal_check):
                 T[a][s,n_states-1] = 1e10
             else:
                 # small probability mass on self transition
-                if not T[a][s,:].getnnz():
-                    T[a][s,s] = 1
+                T[a][s,s] += 1e-5
         T[a][n_states-1,n_states-1] = 1e10
         T[a] = scipy.sparse.spdiags(1./T[a].sum(axis=1).T, 0, *T[a].shape) * T[a]
     return T
