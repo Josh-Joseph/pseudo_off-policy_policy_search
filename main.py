@@ -34,8 +34,8 @@ def evaluate_approach(method, problem, analysis, save_it=False):
     elif problem == 'mountaincar':
         if analysis == 'misspecification':
             # drag and noise on xdot
-            #all_drag_mu = [0, .001, .005, .01, .05, .1, .5, 1, 5, 10 , 50]
-            all_drag_mu = [.5, 1, 5, 10 , 50]
+            #all_drag_mu = [0, .001, .005, .01, .05, .1, .5, 1, 5, 10, 50]
+            all_drag_mu = [10, 50]
             all_drag_sig = [.001]
             all_n = [1000]
         elif analysis == 'sample_complexity':
