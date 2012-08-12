@@ -1,52 +1,128 @@
+import numpy as np
+import pandas
+from datetime import datetime
 import matplotlib.pyplot as plt
 import parallel
 import rl_tools
 import mountaincar
 import cartpole
+import pops
+import ml
 
+reload(ml)
 reload(rl_tools)
 reload(mountaincar)
 reload(cartpole)
 
-#all_mu_wind = (0, -0.0001, -0.0002, -0.0003, -0.0004, -0.0005, -0.0006, -0.0007, -0.0008,  -0.0009, -0.001)
-#all_sig_wind = (0, .00025, .0005, .00075, .001, .002, .003, .004, .005, .01)
-
-#all_mu_wind = (0, -0.0001, -0.0002, -0.0003, -0.0004, -0.0005, -0.0006, -0.0007)
-#all_sig_wind = (.0001, .005, .01)
-
+# par range for drag and noise on xdot and used for results in /old_results
 #all_drag_mu = (0, .1, .2, .3, .4, .5, .6, .7, .8)
 #all_drag_sig = (0, .25, .5, .75, 1, 1.5, 2)
 
-all_drag_mu = (0, .1, .2, .3, .4, .5, .6, .7, .8, .9, 1)
-all_drag_sig = (0, .2, 2)
 
-methods = ('Best_approx' ,'True_model','MB-ME')
 
-all_trials = range(10)
+## drag on xdot and noise on x
+#all_drag_mu = np.arange(0,1.1,.1)
+#all_drag_sig = [.0025]
 
-all_n = [200]
+#all_wind = [0, .1, .2, .3, .4, .5, 1]  #.005 was solvable
 
-def go(plow_it_with_all_those_cores=True):
-    domains = [mountaincar.Mountaincar((drag_mu, drag_sig)) for drag_sig in all_drag_sig for drag_mu in all_drag_mu]
-    f = lambda method: rl_tools.evaluate_methods(method=method, domains=domains, all_trials=all_trials, all_n=all_n)
-    if plow_it_with_all_those_cores:
-        raw_results = parallel.parmap(f, methods)
-    else:
-        raw_results = map(f, methods)
-    results = {}
-    for raw in raw_results:
-        results[raw[0]] = raw[1]
+
+
+
+def evaluate_approach(method, problem, analysis, save_it=False):
+
+    all_trials = range(5)
+    if method == 'true_model':
+        all_trials = [0]
+
+    #if problem == 'cartpole':
+    #    if analysis == 'misspecification':
+    #        all_n = [10000]
+    #    elif analysis == 'sample_complexity':
+    #        all_n = [50, 100, 250, 500, 1000, 1500, 2000, 5000]
+    #elif problem == 'mountaincar':
+    #    if analysis == 'misspecification':
+    #        all_n = [2000]
+    #    elif analysis == 'sample_complexity':
+    #        all_n = [50, 100, 200]#, 500, 1000, 2000]
+
+    if problem == 'cartpole':
+        if analysis == 'misspecification':
+            all_wind = np.arange(0,2.1,.1)
+            all_sig = [.01]
+            all_n = [10000]
+        elif analysis == 'sample_complexity':
+            all_wind = [.2]
+            all_sig = [.01]
+            all_n = [50, 100, 250, 500, 1000, 1500, 2000, 5000]
+        domains = [cartpole.Cartpole((wind, sig)) for sig in all_sig for wind in all_wind]
+    elif problem == 'mountaincar':
+        if analysis == 'misspecification':
+            # drag and noise on xdot
+            all_drag_mu = np.arange(0,1.1,.1)
+            all_drag_sig = [.5, 1.5, 2, 2.5]
+            all_n = [2000]
+        elif analysis == 'sample_complexity':
+            # drag and noise on xdot
+            all_drag_mu = np.arange(0,1.1,.1)
+            all_drag_sig = [.5, 1.5, 2, 2.5]
+            all_n = [50, 100, 200]#, 500, 1000, 2000]
+        domains = [mountaincar.Mountaincar((drag_mu, drag_sig)) for drag_sig in all_drag_sig for drag_mu in all_drag_mu]
+
+    print "[main.evaluate_approach]: Evaluating the performance of " + method + " ..."
+    index = pandas.MultiIndex.from_tuples([(n, trial) for n in all_n for trial in all_trials])
+    results = pandas.DataFrame(index=index, columns=[domain.input_pars for domain in domains])
+    for trial in all_trials:
+        for domain in domains:
+            if method != 'true_model':
+                data = domain.generate_batch_data(N=np.max(all_n))
+            for n in all_n:
+                if method == 'true_model':
+                    policy = domain.optimal_policy()
+                elif method == 'best_model':
+                    policy = rl_tools.best_policy(domain)
+                elif method == 'random':
+                    policy = domain.baseline_policy()
+                elif method == 'pops':
+                    policy = pops.best_policy(domain, data[:n])
+                elif method == 'max_likelihood_approx':
+                    policy = ml.approx_model_policy(domain, data[:n])
+                elif method == 'max_likelihood_big_discrete':
+                    policy = ml.discrete_model_policy(domain, data[:n])
+                else:
+                    raise Exception('Unknown policy learning method: ' + method)
+                results[domain.input_pars][n, trial] = domain.evaluate_policy(policy)
+                print str(domain.input_pars) + " - " + str(n) + " - " + str(results[domain.input_pars][n, trial])
+    if save_it:
+        save_results(method, problem, analysis, results)
     return results
 
-def plot_results(results):
-    for drag_sig in all_drag_sig:
+def save_results(method, problem, analysis, results):
+    store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
+    key = method # + ", " + datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+    store[key] = results
+    store.close()
+
+def plot_results(problem, analysis):
+    store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
+    for par in list(set([pars[1] for pars in store['true_model']])):
         plt.figure()
-        for key in results.keys():
-            x = all_drag_mu
-            y = [results[key][all_n[0]].mean(axis=1)[(drag_mu, drag_sig)] for drag_mu in all_drag_mu]
-            plt.plot(x, y, linewidth=2, label=key)
+        for key in store.keys():
+            x = [pars[0] for pars in store['true_model'] if pars[1] == par]
+            y = [store[key][(xx, par)].mean() for xx in x]
+            if key == 'true_model':
+                plt.plot(x, y, linewidth=2, label=key)
+            else:
+                yerr = np.array([2*store[key][(xx, par)].std()/np.sqrt(len(store[key][(xx, par)])) for xx in x])
+                plt.errorbar(x, y, yerr=yerr, linewidth=2, label=key)
         plt.legend()
-        plt.title("drag_sig = " + str(drag_sig))
-        plt.ylim((-500,0))
-        plt.xlabel('drag_mu')
+        plt.title("par[1] = " + str(par) + ", 95% confidence interval of the mean")
+        plt.xlabel('par[0]')
         plt.ylabel('expected total reward')
+        if problem == 'mountaincar':
+            plt.ylim((-500,0))
+        else:
+            plt.xlim((0,1))
+            plt.ylim((0,500))
+
+    store.close()

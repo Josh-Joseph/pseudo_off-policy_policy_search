@@ -1,8 +1,9 @@
-import numpy as np
 import itertools
+import numpy as np
 import pandas
 import time
 from scipy.optimize import leastsq, fmin
+import scipy.spatial
 import scipy.sparse
 import policy_representations
 import parallel
@@ -45,7 +46,7 @@ def state_space_meshgrid(list_of_binned_states):
 
 gamma = .99
 print "[rl_tools]: A gamma of " + str(gamma) + " is used for value iteration."
-def value_iteration(T, state_centers, reward_fn, threshold=1e-5):
+def value_iteration(T, state_centers, reward_fn, threshold=1e-5, pi_init=None):
     if scipy.sparse.issparse(T[0]):
         n_actions = len(T)
         n_states = T[0].shape[0]
@@ -55,7 +56,10 @@ def value_iteration(T, state_centers, reward_fn, threshold=1e-5):
     for s in range(n_states):
         R[s] = reward_fn(state_centers[s])
     V_old = R.copy()
-    pi = np.zeros(n_states, dtype=np.int)
+    if pi_init is None:
+        pi = np.zeros(n_states, dtype=np.int)
+    else:
+        pi = pi_init.copy()
     V = 2*V_old
     Q = np.empty((n_states, n_actions))
     while np.nanmax(np.abs((V-V_old)/(V_old+1e-50)))>=threshold:
@@ -76,6 +80,42 @@ def split_states_on_dim(state_centers):
     for i in range(state_centers.shape[1]):
         dim_centers.append(np.sort(np.array(list(set(state_centers[:,i])))))
     return dim_centers
+
+def fit_T(data, state_centers, action_centers, goal_check):
+    kdtree = scipy.spatial.KDTree(state_centers[:-1])
+    n_states, n_dims = state_centers.shape
+    n_actions, = action_centers.shape
+    T = []
+    for a in range(n_actions):
+        T.append(scipy.sparse.lil_matrix((n_states, n_states)))
+    all_x = np.zeros((0, n_dims))
+    all_x_next = np.zeros((0, n_dims))
+    for n in range(len(data)):
+        nan_inds = np.where(np.isnan(data[n].values[:,0]))[0]
+        first_nan = len(data[n].values[:,0]) if len(nan_inds) == 0 else nan_inds[0]
+        all_x = np.append(all_x, data[n].values[:first_nan-1,:-2], axis=0)
+        all_x_next = np.append(all_x_next, data[n].values[1:first_nan,:-2], axis=0)
+    trash, all_s = kdtree.query(all_x)
+    trash, all_s_next = kdtree.query(all_x_next)
+    for n in range(len(data)):
+        for t in range(len(data[n])-1):
+            if np.isnan(data[n]['x'][t+1]):
+                break
+            u = data[n]['u'][t]
+            a = np.argmin(np.abs(u - action_centers))
+            T[a][all_s[t], all_s_next[t]] = T[a][all_s[t], all_s_next[t]] + 1
+    for a in range(n_actions):
+        for s in range(n_states-1):
+            if goal_check(state_centers[s]):
+                # transitions to absorbing state
+                T[a][s,n_states-1] = 1e10
+            else:
+                # small probability mass on self transition
+                if not T[a][s,:].getnnz():
+                    T[a][s,s] = 1
+        T[a][n_states-1,n_states-1] = 1e10
+        T[a] = scipy.sparse.spdiags(1./T[a].sum(axis=1).T, 0, *T[a].shape) * T[a]
+    return T
 
 def deterministic_continuous_to_discrete_model(dynamics, state_centers, action_centers, goal_check):
     dim_centers = split_states_on_dim(state_centers)
@@ -127,57 +167,59 @@ def policy_wrt_true_model(domain):
 
 def err_array(domain, pars, data):
     err = []
-    for i in set([i for i,j in data.index]):
-        episode_values = data.ix[i].values.copy()
+    for i in range(len(data)): # for i in set([i for i,j in data.index]):
+        episode_values = data[i].values.copy() # episode_values = data.ix[i].values.copy()
         for j in range(domain.episode_length):
             if not np.isnan(episode_values[j,0]) and j != domain.episode_length-1 and not np.isnan(episode_values[j+1,0]):
                 err.append(np.sum(np.array([domain.approx_dynamics(episode_values[j,:domain.n_dim], episode_values[j,domain.n_dim], pars)-episode_values[j+1,:domain.n_dim]])**2))
     return err
 
-def model_based_min_error_policy(domain, data, pars0):
-    f = lambda pars: err_array(domain, pars, data)
-    pars = leastsq(f, pars0)[0]
-    return policy_wrt_approx_model(domain, pars), pars
+def hill_climb(fn, optimization_pars, ml_start=None):
+    # fn must return [input, fn(input)] with input as a tuple
+    step = optimization_pars['initial step size']
+    eval_record = {}
+    new_inputs = [np.around(optimization_pars['start'].copy(), decimals=10)]
+    if ml_start is not None:
+        new_inputs.append(ml_start)
+    all_out = parallel.parmap(fn, [np.around(input, decimals=10) for input in new_inputs])
+    for out in all_out:
+        eval_record[out[0]] = out[1]
+    center = eval_record.keys()[np.argmax(eval_record.values())]
+    #print eval_record
+    while len(eval_record.keys()) < optimization_pars['maximum evaluations']:
+        new_inputs = []
+        for i in range(len(step)):
+            new_inputs.append([center[i] - step[i], center[i].copy(), center[i] + step[i]])
+        new_inputs = list(itertools.product(*new_inputs))
+        all_out = parallel.parmap(fn, [np.around(input, decimals=10) for input in new_inputs if input not in eval_record.keys()])
+        for out in all_out:
+            eval_record[out[0]] = out[1]
+        new_center = eval_record.keys()[np.argmax(eval_record.values())]
+        if np.all(new_center == center):
+            step /= 2.0
+        else:
+            center = new_center
+        #print "------------"
+        #print center
+        #print step
+        #print len(eval_record.keys())
+        #print eval_record
+    return np.array(eval_record.keys()[np.argmax(eval_record.values())])
 
-def learn_policy(domain, method, data):
-    if method == 'True_model':
-        #print "[rl_tools]: Learning the optimal policy..."
-        policy = policy_wrt_true_model(domain)
-    elif method == 'Best_approx':
-        #print "[rl_tools]: Learning the best policy..."
-        policy = best_policy(domain)
-    elif method == 'MB-POPS':
-        policy = model_based_POPS(domain, data)
-    elif method == 'MB-ME': # maximum likelihood
-        #print "[rl_tools]: Learning the model-based minimum error policy..."
-        policy, pars = model_based_min_error_policy(domain, data, domain.true_pars)
-    elif method == 'VB-POPS':
-        raise Exception('VB-POPS is not implemented yet')
-    elif method == 'VB-ME': # LSPI
-        raise Exception('VB-ME is not implemented yet')
-    else:
-        raise Exception('Unknown policy learning method: ' + method)
-    return policy
-
-def model_based_POPS(domain, data):
-    f = lambda pars: [pars, mfmc.evaluate_policy(policy_wrt_approx_model(domain, pars), data)]
-    raw_returns = parallel.largeparmap(f, domain.initial_par_search_space)
-    ind = np.argmax([raw[1] for raw in raw_returns])
-    pars = raw_returns[ind][0]
-    if 0:
-        raise Exception('FIX THIS')
-        f = lambda pars: -domain.evaluate_policy(policy_wrt_approx_model(domain, pars))
-        pars = fmin(f, pars)
-    return policy_wrt_approx_model(domain, pars)
 
 def best_policy(domain):
-    f = lambda pars: [pars, domain.evaluate_policy(policy_wrt_approx_model(domain, pars))]
-    raw_returns = parallel.largeparmap(f, domain.initial_par_search_space)
-    ind = np.argmax([raw[1] for raw in raw_returns])
-    pars = raw_returns[ind][0]
-    if 0:
-        f = lambda pars: -domain.evaluate_policy(policy_wrt_approx_model(domain, pars))
-        pars = fmin(f, pars)
+    f = lambda pars: [tuple(pars), domain.evaluate_policy(policy_wrt_approx_model(domain, pars))]
+    pars = hill_climb(f, domain.optimization_pars)
+    print pars
+    #if 1:
+    #    raw_returns = parallel.largeparmap(f, domain.initial_par_search_space)
+    #else:
+    #    raw_returns = map(f, domain.initial_par_search_space)
+    #ind = np.argmax([raw[1] for raw in raw_returns])
+    #pars = raw_returns[ind][0]
+    #if 0:
+    #    f = lambda pars: -domain.evaluate_policy(policy_wrt_approx_model(domain, pars))
+    #    pars = fmin(f, pars)
     return policy_wrt_approx_model(domain, pars)
 
 class Domain:
@@ -192,38 +234,53 @@ class Domain:
         self.initstate = np.nan
         self.action_centers = np.nan
         self.n_x_centers = np.nan
+        self.n_theta_centers = np.nan
         self.n_xdot_centers = np.nan
+        self.n_thetadot_centers = np.nan
         self.true_pars = np.nan
         self.noise = np.nan
         self.value_iteration_threshold = np.nan
+        self.distance_fn = np.nan
+        self.optimization_pars = {'initial step size':np.array([]), 'start':np.array([]), 'maximum evaluations':np.nan}
         self.state_centers = self.construct_discrete_policy_centers()
         self.dim_centers = split_states_on_dim(self.state_centers)
+        self.pi_init = None
 
     def construct_discrete_policy_centers(self):
         if self.n_dim == 2:
             x_centers = np.linspace(self.bounds[0,0], self.bounds[1,0], self.n_x_centers)
             xdot_centers = np.linspace(self.bounds[0,1], self.bounds[1,1], self.n_xdot_centers)
             state_centers = state_space_meshgrid((x_centers, xdot_centers))
+        elif self.n_dim == 4:
+            x_centers = np.array([0]) # np.linspace(self.bounds[0,0], self.bounds[1,0], self.n_x_centers)
+            theta_centers = np.linspace(self.bounds[0,1], self.bounds[1,1], self.n_theta_centers)
+            xdot_centers = np.linspace(self.bounds[0,2], self.bounds[1,2], self.n_xdot_centers)
+            thetadot_centers = np.linspace(self.bounds[0,3], self.bounds[1,3], self.n_thetadot_centers)
+            state_centers = state_space_meshgrid((x_centers, theta_centers, xdot_centers, thetadot_centers))
         else:
-            raise Exception('construct_discrete_policy_centers() is only implemented for n_dim == 2')
+            raise Exception('construct_discrete_policy_centers is only implemented for cartpole and mountaincar')
         return state_centers
 
     def evaluate_policy(self, policy):
         data = self.generate_batch_data(N=self.N_MC_eval_samples, policy=policy)
-        episode_return = data['r'].sum()*1.0/self.N_MC_eval_samples
+        episode_return = 0
+        for n in range(len(data)):
+            episode_return += data[n]['r'].sum()
+        episode_return *= 1.0/self.N_MC_eval_samples
         return episode_return
 
     def generate_batch_data(self, N, policy=None):
         #print "[rl_tools]: Generating " + str(N) + " episodes of " + ("batch training data..." if policy is None else "evaluation data...")
-        index = pandas.MultiIndex.from_tuples([(n, t) for n in range(N) for t in range(self.episode_length) ], names=['episode','time'])
-        data = pandas.DataFrame(index=index, columns=self.data_columns)
+        #index = pandas.MultiIndex.from_tuples([(n, t) for n in range(N) for t in range(self.episode_length) ], names=['episode','time'])
+        #data = pandas.DataFrame(index=index, columns=self.data_columns)
         f = lambda trash: self.simulate_episode(policy)
         if 0:
             raw_data = parallel.largeparmap(f, range(N))
         else:
             raw_data = map(f, range(N))
-        for n in range(N):
-            data.ix[n] = raw_data[n]
+        #for n in range(N):
+        #    data.ix[n] = raw_data[n]
+        data = raw_data
         return data
 
     def simulate_episode(self, policy=None):
@@ -231,8 +288,9 @@ class Domain:
         episode_data = pandas.DataFrame(index=range(self.episode_length), columns=self.data_columns)
         if policy is None: # create batch training data
             policy = discrete_policy(self)
-        #s = np.random.random(self.n_dim) * np.diff(self.bounds, axis=0)[0] + self.bounds[0,:]
-        s = self.initstate.copy()
+            s = np.random.random(self.n_dim) * np.diff(self.bounds, axis=0)[0] + self.bounds[0,:]
+        else:
+            s = self.initstate.copy()
         for t in range(self.episode_length):
             u = policy.get_action(s)
             for col_i in range(self.n_dim):
@@ -243,6 +301,14 @@ class Domain:
                 break
             s = self.true_dynamics(s, u)
         return episode_data
+
+    def optimal_policy(self):
+        T = stochastic_continuous_to_discrete_model(self)
+        states_to_actions, V = value_iteration(T, self.state_centers, self.reward, threshold=self.value_iteration_threshold)
+        return discrete_policy(self, states_to_actions)
+
+    def baseline_policy(self):
+        return discrete_policy(self)
 
     def reward(self, s):
         raise Exception('reward(s) must be implemented')
@@ -258,3 +324,6 @@ class Domain:
 
     def at_goal(self, s):
         raise Exception('at_goal(s) must be implemeneted')
+
+    def distance_fn(self, x1, u1, x2, u2):
+        raise Exception('distance_fn(x1, u1, x2, u2) must be implemeneted')
