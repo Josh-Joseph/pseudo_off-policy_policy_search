@@ -10,6 +10,7 @@ XDOTMIN = -0.07
 XDOTMAX = 0.07
 INITSTATE = np.array([-np.pi / 2.0 / 3.0, 0.0])
 
+
 class Mountaincar(rl_tools.Domain):
     def __init__(self, input_pars):
         self.input_pars = input_pars
@@ -56,21 +57,28 @@ class Mountaincar(rl_tools.Domain):
         x = s[0]
         xdot = s[1]
 
-        ## wind and noise on x
-        #if self.noise[1]:
-        #    s[0] = min(max(x+xdot + self.noise[0] + np.random.normal(loc=0, scale=self.noise[1]), self.bounds[0,0]), self.bounds[1,0])
-        #    s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)), self.bounds[0,1]), self.bounds[1,1])
-        #else:
-        #    s[0] = min(max(x+xdot + self.noise[0], self.bounds[0,0]), self.bounds[1,0])
-        #    s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)), self.bounds[0,1]), self.bounds[1,1])
-
-        # drag and noise on xdot
-        if self.noise[1]:
-            s[0] = min(max(x+xdot, self.bounds[0,0]), self.bounds[1,0])
-            s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)) - np.sign(xdot)*self.noise[0]*(xdot**2) + np.random.normal(loc=0, scale=max(1e-10, self.noise[1]*(xdot**2))), self.bounds[0,1]), self.bounds[1,1])
+        if 0:
+            #noise on x
+            if self.noise[1]:
+                s[0] = min(max(x+xdot + self.noise[0] + np.random.normal(loc=0, scale=self.noise[1]), self.bounds[0,0]), self.bounds[1,0])
+            else:
+                s[0] = min(max(x+xdot + self.noise[0], self.bounds[0,0]), self.bounds[1,0])
+            s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)), self.bounds[0,1]), self.bounds[1,1])
         else:
+            #noise on xdot
             s[0] = min(max(x+xdot, self.bounds[0,0]), self.bounds[1,0])
-            s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)) - np.sign(xdot)*self.noise[0]*(xdot**2), self.bounds[0,1]), self.bounds[1,1])
+            if self.noise[1]:
+                s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)) + self.noise[0] + np.random.normal(loc=0, scale=self.noise[1]), self.bounds[0,1]), self.bounds[1,1])
+            else:
+                s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)) + self.noise[0], self.bounds[0,1]), self.bounds[1,1])
+
+        ## drag and noise on xdot
+        #if self.noise[1]:
+        #    s[0] = min(max(x+xdot, self.bounds[0,0]), self.bounds[1,0])
+        #    s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)) - np.sign(xdot)*self.noise[0]*(xdot**2) + np.random.normal(loc=0, scale=max(1e-10, self.noise[1]*(xdot**2))), self.bounds[0,1]), self.bounds[1,1])
+        #else:
+        #    s[0] = min(max(x+xdot, self.bounds[0,0]), self.bounds[1,0])
+        #    s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)) - np.sign(xdot)*self.noise[0]*(xdot**2), self.bounds[0,1]), self.bounds[1,1])
 
         ## drag on xdot and noise on x
         #if self.noise[1]:
@@ -89,29 +97,42 @@ class Mountaincar(rl_tools.Domain):
         xdot = s[1]
         pmf = np.zeros(self.state_centers.shape[0])
 
-        ## wind and noise on x
-        #s[0] = min(max(x+xdot + self.noise[0], self.bounds[0,0]), self.bounds[1,0])
-        #s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)), self.bounds[0,1]), self.bounds[1,1])
+        if 0:
+            #noise on x
+            s[0] = min(max(x+xdot + self.noise[0], self.bounds[0,0]), self.bounds[1,0])
+            s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)), self.bounds[0,1]), self.bounds[1,1])
+            s_next_i = rl_tools.find_nearest_index_fast(self.dim_centers, s)
+            if self.noise[1]:
+                supported_s = self.state_centers[:,1] == self.state_centers[s_next_i,1]
+                tmp_pmf = scipy.stats.norm.pdf(self.state_centers[supported_s,0], loc=s[0], scale=self.noise[1])
+                pmf[supported_s] = tmp_pmf
+                pmf /= np.sum(pmf)
+            else:
+                pmf[s_next_i] = 1.0
+        else:
+            #noise on xdot
+            s[0] = min(max(x+xdot, self.bounds[0,0]), self.bounds[1,0])
+            s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)) + self.noise[0], self.bounds[0,1]), self.bounds[1,1])
+            s_next_i = rl_tools.find_nearest_index_fast(self.dim_centers, s)
+            if self.noise[1]:
+                supported_s = self.state_centers[:,0] == self.state_centers[s_next_i,0]
+                tmp_pmf = scipy.stats.norm.pdf(self.state_centers[supported_s,1], loc=s[1], scale=self.noise[1])
+                pmf[supported_s] = tmp_pmf
+                pmf /= np.sum(pmf)
+            else:
+                pmf[s_next_i] = 1.0
+
+        ## drag and noise on xdot
+        #s[0] = min(max(x+xdot, self.bounds[0,0]), self.bounds[1,0])
+        #s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)) - np.sign(xdot)*self.noise[0]*(xdot**2), self.bounds[0,1]), self.bounds[1,1])
         #s_next_i = rl_tools.find_nearest_index_fast(self.dim_centers, s)
         #if self.noise[1]:
         #    supported_s = self.state_centers[:,0] == self.state_centers[s_next_i,0]
-        #    tmp_pmf = scipy.stats.norm.pdf(self.state_centers[supported_s,0], loc=s[0], scale=self.noise[1])
+        #    tmp_pmf = scipy.stats.norm.pdf(self.state_centers[supported_s,1], loc=s[1], scale=max(1e-4, self.noise[1]*(xdot**2)))
         #    pmf[supported_s] = tmp_pmf
         #    pmf /= np.sum(pmf)
         #else:
         #    pmf[s_next_i] = 1.0
-
-        # drag and noise on xdot
-        s[0] = min(max(x+xdot, self.bounds[0,0]), self.bounds[1,0])
-        s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)) - np.sign(xdot)*self.noise[0]*(xdot**2), self.bounds[0,1]), self.bounds[1,1])
-        s_next_i = rl_tools.find_nearest_index_fast(self.dim_centers, s)
-        if self.noise[1]:
-            supported_s = self.state_centers[:,0] == self.state_centers[s_next_i,0]
-            tmp_pmf = scipy.stats.norm.pdf(self.state_centers[supported_s,1], loc=s[1], scale=max(1e-4, self.noise[1]*(xdot**2)))
-            pmf[supported_s] = tmp_pmf
-            pmf /= np.sum(pmf)
-        else:
-            pmf[s_next_i] = 1.0
 
         ## drag on xdot and noise on x
         #s[0] = min(max(x+xdot, self.bounds[0,0]), self.bounds[1,0])
@@ -127,6 +148,7 @@ class Mountaincar(rl_tools.Domain):
 
         return pmf
 
-
+#print "[mountaincar]: only noise on x !!!!!!!!!!!!!!"
+print "[mountaincar]: only noise on xdot !!!!!!!!!!!!!!"
 
 

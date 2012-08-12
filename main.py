@@ -14,36 +14,12 @@ reload(rl_tools)
 reload(mountaincar)
 reload(cartpole)
 
-# par range for drag and noise on xdot and used for results in /old_results
-#all_drag_mu = (0, .1, .2, .3, .4, .5, .6, .7, .8)
-#all_drag_sig = (0, .25, .5, .75, 1, 1.5, 2)
-
-
-
-## drag on xdot and noise on x
-#all_drag_mu = np.arange(0,1.1,.1)
-#all_drag_sig = [.0025]
-
-#all_wind = [0, .1, .2, .3, .4, .5, 1]  #.005 was solvable
-
-
 
 def evaluate_approach(method, problem, analysis, save_it=False):
 
     all_trials = range(5)
     if method == 'true_model':
         all_trials = [0]
-
-    #if problem == 'cartpole':
-    #    if analysis == 'misspecification':
-    #        all_n = [10000]
-    #    elif analysis == 'sample_complexity':
-    #        all_n = [50, 100, 250, 500, 1000, 1500, 2000, 5000]
-    #elif problem == 'mountaincar':
-    #    if analysis == 'misspecification':
-    #        all_n = [2000]
-    #    elif analysis == 'sample_complexity':
-    #        all_n = [50, 100, 200]#, 500, 1000, 2000]
 
     if problem == 'cartpole':
         if analysis == 'misspecification':
@@ -58,9 +34,9 @@ def evaluate_approach(method, problem, analysis, save_it=False):
     elif problem == 'mountaincar':
         if analysis == 'misspecification':
             # drag and noise on xdot
-            all_drag_mu = [.25] #np.arange(0,1.1,.1)
-            all_drag_sig = [0, .25, .5, .75, 1, 1.5, 2, 2.5, 3]
-            all_n = [1000]
+            all_drag_mu = [0]
+            all_drag_sig = [0, .001, .005, .01, .05, .1, .5]
+            all_n = [750]
         elif analysis == 'sample_complexity':
             # drag and noise on xdot
             all_drag_mu = [.1] #np.arange(0,1.1,.1)
