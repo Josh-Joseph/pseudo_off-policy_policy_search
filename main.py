@@ -28,7 +28,6 @@ reload(cartpole)
 
 
 
-
 def evaluate_approach(method, problem, analysis, save_it=False):
 
     all_trials = range(5)
