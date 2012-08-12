@@ -16,7 +16,7 @@ def parmap(f,X):
 
 def largeparmap(f,X):
     answer = []
-    inc = 500
+    inc = 250
     start = 0
     end = min(inc, len(X))
     while True:

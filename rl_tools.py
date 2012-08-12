@@ -272,7 +272,7 @@ class Domain:
         #index = pandas.MultiIndex.from_tuples([(n, t) for n in range(N) for t in range(self.episode_length) ], names=['episode','time'])
         #data = pandas.DataFrame(index=index, columns=self.data_columns)
         f = lambda trash: self.simulate_episode(policy)
-        if 0:
+        if 1:
             raw_data = parallel.largeparmap(f, range(N))
         else:
             raw_data = map(f, range(N))
