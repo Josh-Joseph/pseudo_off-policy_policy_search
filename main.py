@@ -40,7 +40,7 @@ def evaluate_approach(method, problem, analysis, save_it=False):
             all_n = [2000]
         elif analysis == 'sample_complexity':
             # drag and noise on xdot
-            all_drag_mu = [.1] #np.arange(0,1.1,.1)
+            all_drag_mu = [.0025] #np.arange(0,1.1,.1)
             all_drag_sig = [.01]
             all_n = [10, 50, 100, 150, 200, 250, 500, 1000, 1500, 2000]
         domains = [mountaincar.Mountaincar((drag_mu, drag_sig)) for drag_sig in all_drag_sig for drag_mu in all_drag_mu]
