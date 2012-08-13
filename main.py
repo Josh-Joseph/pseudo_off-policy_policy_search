@@ -34,13 +34,14 @@ def evaluate_approach(method, problem, analysis, save_it=False):
     elif problem == 'mountaincar':
         if analysis == 'misspecification':
             # drag and noise on xdot
-            all_drag_mu = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
+            #all_drag_mu = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
+            all_drag_mu = [0, .0005, .001, .0015, .002, .0025, .003, .0035]
             all_drag_sig = [.01]
             all_n = [2000]
         elif analysis == 'sample_complexity':
             # drag and noise on xdot
             all_drag_mu = [.1] #np.arange(0,1.1,.1)
-            all_drag_sig = [1]
+            all_drag_sig = [.01]
             all_n = [10, 50, 100, 150, 200, 250, 500, 1000, 1500, 2000]
         domains = [mountaincar.Mountaincar((drag_mu, drag_sig)) for drag_sig in all_drag_sig for drag_mu in all_drag_mu]
 
