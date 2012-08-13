@@ -286,9 +286,9 @@ class Domain:
         episode_data = pandas.DataFrame(index=range(self.episode_length), columns=self.data_columns)
         if policy is None: # create batch training data
             policy = discrete_policy(self)
-            #s = np.random.random(self.n_dim) * np.diff(self.bounds, axis=0)[0] + self.bounds[0,:]
-        #else:
-        s = self.initstate.copy()
+            s = np.random.random(self.n_dim) * np.diff(self.bounds, axis=0)[0] + self.bounds[0,:]
+        else:
+            s = self.initstate.copy()
         for t in range(self.episode_length):
             u = policy.get_action(s)
             for col_i in range(self.n_dim):
@@ -323,5 +323,9 @@ class Domain:
     def at_goal(self, s):
         raise Exception('at_goal(s) must be implemeneted')
 
-    def distance_fn(self, x1, u1, x2, u2):
+    #def distance_fn(self, x1, u1, x2, u2):
+    #    raise Exception('distance_fn(x1, u1, x2, u2) must be implemeneted')
+
+    def distance_fn(self, x1, x2):
+        # for this distance fn we're assuming u1==u2
         raise Exception('distance_fn(x1, u1, x2, u2) must be implemeneted')

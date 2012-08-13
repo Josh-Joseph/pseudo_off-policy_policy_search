@@ -36,8 +36,11 @@ class Cartpole(rl_tools.Domain):
         self.dim_centers = rl_tools.split_states_on_dim(self.state_centers)
         self.pi_init = 1-np.int8((np.sign(self.state_centers[:,1]) + 1)/2)
 
-    def distance_fn(self, x1, u1, x2, u2):
-        return 1e5*(u1 != u2) + np.sum(((x1-x2)/np.array([1e5, 0.4189, 10, 10]))**2, axis=1)
+    #def distance_fn(self, x1, u1, x2, u2):
+    #    return 1e5*(u1 != u2) + np.sum(((x1-x2)/np.array([1e5, 0.4189, 10, 10]))**2, axis=1)
+
+    def distance_fn(self, x1, x2):
+        return np.sum(((x1-x2)/np.array([1e5, 0.4189, 10, 10]))**2, axis=1)
 
     def at_goal(self, s):
         return np.abs(s[1]) == THETABOUND

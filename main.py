@@ -35,7 +35,7 @@ def evaluate_approach(method, problem, analysis, save_it=False):
         if analysis == 'misspecification':
             # drag and noise on xdot
             #all_drag_mu = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
-            all_drag_mu = [0, .00005, .0001, .00015, .0002, .00025, .0003, .00035, .0004, .00045, .0005]
+            all_drag_mu = [0, .0001, .0002, .0003, .0004, .0005]
             all_drag_sig = [.01]
             all_n = [1000]
         elif analysis == 'sample_complexity':

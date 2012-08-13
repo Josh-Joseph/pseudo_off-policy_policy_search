@@ -35,8 +35,11 @@ class Mountaincar(rl_tools.Domain):
         self.dim_centers = rl_tools.split_states_on_dim(self.state_centers)
         self.pi_init = None
 
-    def distance_fn(self, x1, u1, x2, u2):
-        return 1e5*(u1 != u2) + np.sum(((x1-x2)/np.array([1.7, .14]))**2, axis=1)
+    #def distance_fn(self, x1, u1, x2, u2):
+    #    return 1e5*(u1 != u2) + np.sum(((x1-x2)/np.array([1.7, .14]))**2, axis=1)
+
+    def distance_fn(self, x1, x2):
+        return np.sum(((x1-x2)/np.array([1.7, .14]))**2, axis=1)
 
     def at_goal(self, s):
         return s[0] == XMAX
@@ -59,7 +62,7 @@ class Mountaincar(rl_tools.Domain):
 
         if 1:
             #noise on x, slip on xdot
-            slip = -np.sign(xdot)*self.noise[0]
+            slip = 0 if x < -0.5235987755982988 else -np.sign(xdot)*self.noise[0]
             if self.noise[1]:
                 s[0] = min(max(x+xdot + np.random.normal(loc=0, scale=self.noise[1]), self.bounds[0,0]), self.bounds[1,0])
             else:
@@ -108,7 +111,7 @@ class Mountaincar(rl_tools.Domain):
 
         if 1:
             #noise on x, slip on xdot
-            slip = -np.sign(xdot)*self.noise[0]
+            slip = 0 if x < -0.5235987755982988 else -np.sign(xdot)*self.noise[0]
             s[0] = min(max(x+xdot, self.bounds[0,0]), self.bounds[1,0])
             s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)) + slip, self.bounds[0,1]), self.bounds[1,1])
             s_next_i = rl_tools.find_nearest_index_fast(self.dim_centers, s)
