@@ -4,8 +4,8 @@ import pandas
 import numpy as np
 import parallel
 
-p = 5
-#p = 10
+#p = 5
+p = 10
 
 print "[pops]: p is " + str(p)
 
