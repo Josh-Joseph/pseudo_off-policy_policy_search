@@ -5,7 +5,7 @@ import numpy as np
 import parallel
 
 #p = 5
-p = 10
+#p = 10
 
 print "[pops]: p is " + str(p)
 
@@ -28,6 +28,7 @@ def best_policy(domain, data):
     return discrete_policy(domain, states_to_actions)
 
 def mfmc_evaluation(policy, data, distance_fn, initstate, episode_length, goal_check):
+    p = int(np.ceil(len(data)*.01))
     n_states, n_dims = policy.state_centers.shape
     u_dict = {}
     x_array = []
