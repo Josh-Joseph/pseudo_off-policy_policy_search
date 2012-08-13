@@ -27,7 +27,7 @@ def best_policy(domain, data):
     states_to_actions, V = value_iteration(T, domain.state_centers, domain.reward, threshold=domain.value_iteration_threshold)
     return discrete_policy(domain, states_to_actions)
 
-def mfmc_evaluation(policy, data, distance_fn, initstate, episode_length, goal_check)
+def mfmc_evaluation(policy, data, distance_fn, initstate, episode_length, goal_check):
     n_states, n_dims = policy.state_centers.shape
     x_array = np.zeros((0, n_dims))
     xnext_array = np.zeros((0, n_dims))
