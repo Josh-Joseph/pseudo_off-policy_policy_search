@@ -5,7 +5,7 @@ import numpy as np
 import parallel
 #import scipy.spatial
 
-p = 5
+p = 10
 
 def best_policy(domain, data):
     f = lambda pars: err_array(domain, pars, data)
