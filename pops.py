@@ -6,8 +6,7 @@ import parallel
 
 #p = 5
 #p = 10
-
-print "[pops]: p is " + str(p)
+#print "[pops]: p is " + str(p)
 
 def best_policy(domain, data):
     f = lambda pars: err_array(domain, pars, data)
