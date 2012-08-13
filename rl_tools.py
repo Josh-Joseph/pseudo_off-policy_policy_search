@@ -187,7 +187,7 @@ def hill_climb(fn, optimization_pars, ml_start=None):
     while len(eval_record.keys()) < optimization_pars['maximum evaluations']:
         new_inputs = []
         for i in range(len(step)):
-            new_inputs.append([center[i] - step[i], center[i].copy(), center[i] + step[i]])
+            new_inputs.append([center[i] - step[i], center[i] - 0.5*step[i], center[i] - 0.25*step[i], center[i].copy(), center[i] + 0.25*step[i], center[i] + 0.5*step[i], center[i] + step[i]])
         new_inputs = list(itertools.product(*new_inputs))
         all_out = parallel.parmap(fn, [np.around(input, decimals=10) for input in new_inputs if input not in eval_record.keys()])
         for out in all_out:

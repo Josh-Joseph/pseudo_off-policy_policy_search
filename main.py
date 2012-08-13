@@ -35,9 +35,9 @@ def evaluate_approach(method, problem, analysis, save_it=False):
         if analysis == 'misspecification':
             # drag and noise on xdot
             #all_drag_mu = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
-            all_drag_mu = [0, .0005, .001, .0015, .002, .0025, .003, .0035, .004, .0045, .005]
-            all_drag_sig = [.005]
-            all_n = [2000]
+            all_drag_mu = [0, .00005, .0001, .00015, .0002, .00025, .0003, .00035, .0004, .00045, .0005]
+            all_drag_sig = [.01]
+            all_n = [1000]
         elif analysis == 'sample_complexity':
             # drag and noise on xdot
             all_drag_mu = [.0025] #np.arange(0,1.1,.1)
@@ -81,24 +81,40 @@ def save_results(method, problem, analysis, results):
 
 def plot_results(problem, analysis):
     store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
-    for par in list(set([pars[1] for pars in store['true_model']])):
+
+    if analysis == 'misspecification':
+        for par in list(set([pars[1] for pars in store['true_model']])):
+            plt.figure()
+            for key in store.keys():
+                x = [pars[0] for pars in store['true_model'] if pars[1] == par]
+                y = [store[key][(xx, par)].mean() for xx in x]
+                if key == 'true_model':
+                    plt.plot(x, y, linewidth=2, label=key)
+                else:
+                    yerr = np.array([2*store[key][(xx, par)].std()/np.sqrt(len(store[key][(xx, par)])) for xx in x])
+                    plt.errorbar(x, y, yerr=yerr, linewidth=2, label=key)
+            plt.legend()
+            plt.title("par[1] = " + str(par) + ", 95% confidence interval of the mean")
+            plt.xlabel('par[0]')
+            plt.ylabel('expected total reward')
+            if problem == 'mountaincar':
+                plt.ylim((-500,0))
+            else:
+                plt.xlim((0,1))
+                plt.ylim((0,500))
+    elif analysis == 'sample_complexity':
         plt.figure()
         for key in store.keys():
-            x = [pars[0] for pars in store['true_model'] if pars[1] == par]
-            y = [store[key][(xx, par)].mean() for xx in x]
+            x = np.sort(list(set([pars[0] for pars in store[key].index])))
             if key == 'true_model':
+                y = [np.mean(store[key].values) for i in x]
                 plt.plot(x, y, linewidth=2, label=key)
             else:
-                yerr = np.array([2*store[key][(xx, par)].std()/np.sqrt(len(store[key][(xx, par)])) for xx in x])
+                y = [np.mean(store[key].ix[i].values) for i in x]
+                yerr = [np.std(store[key].ix[i].values)/np.sqrt(len(store[key].ix[i].values)) for i in x]
                 plt.errorbar(x, y, yerr=yerr, linewidth=2, label=key)
-        plt.legend()
-        plt.title("par[1] = " + str(par) + ", 95% confidence interval of the mean")
-        plt.xlabel('par[0]')
-        plt.ylabel('expected total reward')
-        if problem == 'mountaincar':
-            plt.ylim((-500,0))
-        else:
-            plt.xlim((0,1))
-            plt.ylim((0,500))
+            plt.legend()
+            plt.xlabel('training data size')
+            plt.ylabel('expected total reward')
 
     store.close()
