@@ -187,7 +187,10 @@ def hill_climb(fn, optimization_pars, ml_start=None):
     while len(eval_record.keys()) < optimization_pars['maximum evaluations']:
         new_inputs = []
         for i in range(len(step)):
-            new_inputs.append([center[i] - step[i], center[i].copy(), center[i] + step[i]])
+            if optimization_pars['only positive']:
+                new_inputs.append([max(center[i] - step[i],.001), max(center[i].copy(),.001), max(center[i] + step[i],.001)])
+            else:
+                new_inputs.append([center[i] - step[i], center[i].copy(), center[i] + step[i]])
         new_inputs = list(itertools.product(*new_inputs))
         all_out = parallel.parmap(fn, [np.around(input, decimals=10) for input in new_inputs if input not in eval_record.keys()])
         for out in all_out:
@@ -234,7 +237,7 @@ class Domain:
         self.noise = np.nan
         self.value_iteration_threshold = np.nan
         self.distance_fn = np.nan
-        self.optimization_pars = {'initial step size':np.array([]), 'start':np.array([]), 'maximum evaluations':np.nan}
+        self.optimization_pars = {'initial step size':np.array([]), 'start':np.array([]), 'maximum evaluations':np.nan, 'only positive':False}
         self.state_centers = self.construct_discrete_policy_centers()
         self.dim_centers = split_states_on_dim(self.state_centers)
         self.pi_init = None
