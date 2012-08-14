@@ -15,9 +15,9 @@ reload(mountaincar)
 reload(cartpole)
 
 # I'm pretty sure the following works:
-# 0:.01:.05 drag mu
-# .005 drag sig
-# .005 mud drag constant in mountaincar
+# 0:.005:.05 drag mu
+# .01 drag sig
+# .0025 mud drag constant in mountaincar
 
 
 def evaluate_approach(method, problem, analysis, save_it=False):
@@ -47,7 +47,7 @@ def evaluate_approach(method, problem, analysis, save_it=False):
             all_n = [2000]
         elif analysis == 'sample_complexity':
             # drag and noise on xdot
-            all_drag_mu = [.02] #np.arange(0,1.1,.1)
+            all_drag_mu = [.04] #np.arange(0,1.1,.1)
             all_drag_sig = [.01]
             all_n = [10, 50, 100, 150, 200, 250, 500, 1000, 1500, 2000, 2500, 5000, 7500]
         domains = [mountaincar.Mountaincar((drag_mu, drag_sig)) for drag_sig in all_drag_sig for drag_mu in all_drag_mu]
