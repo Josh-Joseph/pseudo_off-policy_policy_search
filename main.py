@@ -34,7 +34,7 @@ def evaluate_approach(method, problem, analysis, save_it=False):
         elif analysis == 'sample_complexity':
             all_wind = [.2]
             all_sig = [.01]
-            all_n = [50, 500, 1000, 2500, 5000, 7500, 10000, 15000, 20000]
+            all_n = [50, 500, 1000, 2500, 5000, 7500, 10000, 15000, 20000, 25000]
         domains = [cartpole.Cartpole((wind, sig)) for sig in all_sig for wind in all_wind]
     elif problem == 'mountaincar':
         if analysis == 'misspecification':
