@@ -123,5 +123,9 @@ def plot_results(problem, analysis):
             plt.legend()
             plt.xlabel('training data size')
             plt.ylabel('expected total reward')
+            if problem == 'mountaincar':
+                plt.ylim((-500,0))
+            else:
+                plt.ylim((0,500))
 
     store.close()
