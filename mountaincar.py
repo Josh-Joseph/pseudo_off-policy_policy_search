@@ -30,12 +30,12 @@ class Mountaincar(rl_tools.Domain):
         self.value_iteration_threshold = 1e-4
         self.optimization_pars = {'initial step size':np.array([.0024, 1]),
                                   'start':np.array([-0.0025, 3]),
-                                  'maximum evaluations':75,
+                                  'maximum evaluations':50,
                                   'only positive':False}
         self.state_centers = self.construct_discrete_policy_centers()
         self.dim_centers = rl_tools.split_states_on_dim(self.state_centers)
         self.pi_init = None
-        self.training_data_random_start = True
+        self.training_data_random_start = False
 
     #def distance_fn(self, x1, u1, x2, u2):
     #    return 1e5*(u1 != u2) + np.sum(((x1-x2)/np.array([1.7, .14]))**2, axis=1)

@@ -44,7 +44,7 @@ def evaluate_approach(method, problem, analysis, save_it=False):
             #all_drag_mu = [0, .0001, .0005, .001, .006, .007, .008] $ muddy everywhere
             all_drag_mu = [0, .01, .02, .03, .04, .05, .06, .07, .08, .09, .1] # muddy circle
             all_drag_sig = [.01]
-            all_n = [2000]
+            all_n = [500]
         elif analysis == 'sample_complexity':
             # drag and noise on xdot
             all_drag_mu = [.03] #np.arange(0,1.1,.1)
