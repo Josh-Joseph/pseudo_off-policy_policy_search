@@ -185,6 +185,9 @@ def hill_climb(fn, optimization_pars, ml_start=None):
     center = eval_record.keys()[np.argmax(eval_record.values())]
     #print eval_record
     while len(eval_record.keys()) < optimization_pars['maximum evaluations']:
+        #print "-----------"
+        #print "[rl_tools.hill_climb]: step = " + str(step)
+        #print center
         new_inputs = []
         for i in range(len(step)):
             if optimization_pars['only positive']:
