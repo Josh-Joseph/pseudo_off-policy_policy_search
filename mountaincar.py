@@ -27,7 +27,7 @@ class Mountaincar(rl_tools.Domain):
         self.true_pars = (-0.0025, 3)
         self.initial_par_search_space = [[p1, p2] for p1 in np.linspace(-0.003, -.002, 5) for p2 in np.linspace(2, 4, 5)]
         self.noise = input_pars
-        self.value_iteration_threshold = 1e-4
+        self.value_iteration_threshold = 1e-5
         self.optimization_pars = {'initial step size':np.array([.0024, 1]),
                                   'start':np.array([-0.0025, 3]),
                                   'maximum evaluations':50,
