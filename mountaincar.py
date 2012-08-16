@@ -30,12 +30,12 @@ class Mountaincar(rl_tools.Domain):
         self.value_iteration_threshold = 1e-4
         self.optimization_pars = {'initial step size':np.array([.0024, 1]),
                                   'start':np.array([-0.0025, 3]),
-                                  'maximum evaluations':75,
+                                  'maximum evaluations':50,
                                   'only positive':False}
         self.state_centers = self.construct_discrete_policy_centers()
         self.dim_centers = rl_tools.split_states_on_dim(self.state_centers)
         self.pi_init = None
-        self.training_data_random_start = False
+        self.training_data_random_start = True
 
     #def distance_fn(self, x1, u1, x2, u2):
     #    return 1e5*(u1 != u2) + np.sum(((x1-x2)/np.array([1.7, .14]))**2, axis=1)
@@ -65,7 +65,8 @@ class Mountaincar(rl_tools.Domain):
         if 1:
             #noise on x, slip on xdot
             #slip = 0 if x < -0.5235987755982988 else -np.sign(xdot)*self.noise[0]
-            slip = 0 if np.abs(x + 0.5235987755983) > self.noise[0] else -np.sign(xdot)*0.002
+            #slip = 0 if np.abs(x + 0.5235987755983) > self.noise[0] else -np.sign(xdot)*0.002
+            slip = 0 if x < .25 else -np.sign(xdot)*self.noise[0]
             if self.noise[1]:
                 s[0] = min(max(x+xdot + np.random.normal(loc=0, scale=self.noise[1]), self.bounds[0,0]), self.bounds[1,0])
             else:
@@ -115,7 +116,8 @@ class Mountaincar(rl_tools.Domain):
         if 1:
             #noise on x, slip on xdot
             #slip = 0 if x < -0.5235987755982988 else -np.sign(xdot)*self.noise[0]
-            slip = 0 if np.abs(x + 0.5235987755983) > self.noise[0] else -np.sign(xdot)*0.002
+            #slip = 0 if np.abs(x + 0.5235987755983) > self.noise[0] else -np.sign(xdot)*0.002
+            slip = 0 if x < .25 else -np.sign(xdot)*self.noise[0]
             s[0] = min(max(x+xdot, self.bounds[0,0]), self.bounds[1,0])
             s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)) + slip, self.bounds[0,1]), self.bounds[1,1])
             s_next_i = rl_tools.find_nearest_index_fast(self.dim_centers, s)
