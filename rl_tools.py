@@ -185,14 +185,14 @@ def hill_climb(fn, optimization_pars, ml_start=None):
         eval_record[out[0]] = out[1]
     center = eval_record.keys()[np.argmax(eval_record.values())]
     #print eval_record
-    while len(eval_record.keys()) < optimization_pars['maximum evaluations']:
+    while len(eval_record.keys()) < optimization_pars['maximum evaluations'] and np.max(step) > 1e-6:
         #print "-----------"
         #print "[rl_tools.hill_climb]: step = " + str(step)
         #print center
         new_inputs = []
         for i in range(len(step)):
             if optimization_pars['only positive']:
-                new_inputs.append([max(center[i] - step[i],.001), max(center[i].copy(),.001), max(center[i] + step[i],.001)])
+                new_inputs.append([max(center[i] - step[i],.000001), max(center[i].copy(),.000001), max(center[i] + step[i],.000001)])
             else:
                 new_inputs.append([center[i] - step[i], center[i].copy(), center[i] + step[i]])
         new_inputs = list(itertools.product(*new_inputs))

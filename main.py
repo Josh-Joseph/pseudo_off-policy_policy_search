@@ -43,7 +43,8 @@ def evaluate_approach(method, problem, analysis, save_it=False):
             #all_drag_mu = [0, .0001, .0005, .001, .005]
             #all_drag_mu = [0, .0001, .0005, .001, .006, .007, .008] $ muddy everywhere
             #all_drag_mu = [0, .01, .02, .03, .04, .05, .06, .07, .08, .09, .1] # muddy circle
-            all_drag_mu = [0, .01, .02, .03, .04, .05, .06, .07, .08, .09, .1] # muddy top of the right hill
+            #all_drag_mu = [0, .01, .02, .03, .04, .05, .06, .07, .08, .09, .1] # muddy top of the right hill on x
+            all_drag_mu = [0, .001, .002, .003, .004, .005, .006, .007, .008, .009, .01] # muddy top of the right hill on xdot
             all_drag_sig = [.005]
             all_n = [500]
         elif analysis == 'sample_complexity':
