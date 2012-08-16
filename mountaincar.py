@@ -66,7 +66,8 @@ class Mountaincar(rl_tools.Domain):
             #noise on x, slip on xdot
             #slip = 0 if x < -0.5235987755982988 else -np.sign(xdot)*self.noise[0]
             #slip = 0 if np.abs(x + 0.5235987755983) > self.noise[0] else -np.sign(xdot)*0.002
-            slip = 0 if x < .25 else -np.sign(xdot)*self.noise[0]
+            #slip = 0 if x < .25 else -np.sign(xdot)*self.noise[0]
+            slip = 0 if x > -1 else -np.sign(xdot)*self.noise[0]
             if self.noise[1]:
                 s[0] = min(max(x+xdot + np.random.normal(loc=0, scale=self.noise[1]), self.bounds[0,0]), self.bounds[1,0])
             else:
@@ -117,7 +118,8 @@ class Mountaincar(rl_tools.Domain):
             #noise on x, slip on xdot
             #slip = 0 if x < -0.5235987755982988 else -np.sign(xdot)*self.noise[0]
             #slip = 0 if np.abs(x + 0.5235987755983) > self.noise[0] else -np.sign(xdot)*0.002
-            slip = 0 if x < .25 else -np.sign(xdot)*self.noise[0]
+            #slip = 0 if x < .25 else -np.sign(xdot)*self.noise[0]
+            slip = 0 if x > -1 else -np.sign(xdot)*self.noise[0]
             s[0] = min(max(x+xdot, self.bounds[0,0]), self.bounds[1,0])
             s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)) + slip, self.bounds[0,1]), self.bounds[1,1])
             s_next_i = rl_tools.find_nearest_index_fast(self.dim_centers, s)
