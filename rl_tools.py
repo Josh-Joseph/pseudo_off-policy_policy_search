@@ -287,12 +287,11 @@ class Domain:
     def simulate_episode(self, policy=None):
         np.random.seed(int(1e6*time.time()))
         episode_data = pandas.DataFrame(index=range(self.episode_length), columns=self.data_columns)
+        s = self.initstate.copy()
         if policy is None: # create batch training data
             policy = discrete_policy(self)
-        if self.training_data_random_start:
-            s = np.random.random(self.n_dim) * np.diff(self.bounds, axis=0)[0] + self.bounds[0,:]
-        else:
-            s = self.initstate.copy()
+            if self.training_data_random_start:
+                s = np.random.random(self.n_dim) * np.diff(self.bounds, axis=0)[0] + self.bounds[0,:]
         for t in range(self.episode_length):
             u = policy.get_action(s)
             for col_i in range(self.n_dim):
