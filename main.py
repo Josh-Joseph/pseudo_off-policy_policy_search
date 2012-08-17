@@ -46,7 +46,7 @@ def evaluate_approach(method, problem, analysis, save_it=False):
             #all_drag_mu = [0, .01, .02, .03, .04, .05, .06, .07, .08, .09, .1] # muddy top of the right hill on x
             #all_drag_mu = [0, .001, .002, .003, .004, .005, .006, .007, .008, .009, .01] # muddy top of the right hill on xdot
             #all_drag_mu = [0, .01, .02, .03, .04, .05, .06, .07, .08, .09, .1] # % slip on xdot
-            all_drag_mu = [.01, .02, .03, .04, .05, .06, .07, .08, .9, 1] # % slip on xdot
+            all_drag_mu = [.02, .03, .04, .05, .075, .1, .125, .15, .175, .2, .25, .3] # % slip on xdot
             all_drag_sig = [.005]
             all_n = [500]
         elif analysis == 'sample_complexity':
@@ -71,9 +71,9 @@ def evaluate_approach(method, problem, analysis, save_it=False):
                 elif method == 'random':
                     policy = domain.baseline_policy()
                 elif method == 'pops':
-                    smaller_data = [d.copy(deep=True) for d in data[:n]]
-                    policy = pops.best_policy(domain, smaller_data)
-                    #policy = pops.best_policy(domain, data[:n])
+                    #smaller_data = [d.copy(deep=True) for d in data[:n]]
+                    #policy = pops.best_policy(domain, smaller_data)
+                    policy = pops.best_policy(domain, data[:n])
                 elif method == 'max_likelihood_approx':
                     policy = ml.approx_model_policy(domain, data[:n])
                 elif method == 'max_likelihood_big_discrete':

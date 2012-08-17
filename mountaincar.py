@@ -63,13 +63,27 @@ class Mountaincar(rl_tools.Domain):
         xdot = s[1]
 
         if 1:
+            if self.noise[1]:
+                s[0] = min(max(x+xdot + np.random.normal(loc=0, scale=self.noise[1]), self.bounds[0,0]), self.bounds[1,0])
+            else:
+                s[0] = min(max(x+xdot, self.bounds[0,0]), self.bounds[1,0])
+            slip = 0
+            if x < .25 <= s[0]:
+                if xdot > 0:
+                    slip = max(-self.noise[0], -xdot)
+                else:
+                    slip = min(self.noise[0], -xdot)
+                #slip = 0 if x > -1 else -np.sign(xdot)*self.noise[0]
+            s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)) + slip, self.bounds[0,1]), self.bounds[1,1])
+
+        elif 0:
             #noise on x, slip on xdot
             #slip = 0 if x < -0.5235987755982988 else -np.sign(xdot)*self.noise[0]
             #slip = 0 if np.abs(x + 0.5235987755983) > self.noise[0] else -np.sign(xdot)*0.002
             #slip = 0 if x < .25 else -np.sign(xdot)*self.noise[0]
             #slip = 0 if x < .25 else -np.sign(xdot)*self.noise[0]
             slip = 0
-            if 0 < x < .5:
+            if .25 < x < .5:
                 if xdot > 0:
                     slip = max(-self.noise[0]*xdot, -xdot)
                 #else:
