@@ -68,7 +68,8 @@ class Mountaincar(rl_tools.Domain):
             else:
                 s[0] = min(max(x+xdot, self.bounds[0,0]), self.bounds[1,0])
             slip = 0
-            if x < .25 <= s[0]:
+            if x < -.75 <= s[0]:
+            #if x < .25 <= s[0]:
                 if xdot > 0:
                     slip = max(-self.noise[0], -xdot)
                 else:
