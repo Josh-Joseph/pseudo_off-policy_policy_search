@@ -95,7 +95,7 @@ class Mountaincar(rl_tools.Domain):
             #noise and slip on x
             #slip = 0 if x < -0.5235987755982988 else self.noise[0]*(self.true_pars[0]*np.cos(self.true_pars[1]*x))
             slip = 0
-            if -.5 < x < -.6:
+            if -.5 < x < -.75:
                 if xdot > 0:
                     slip = -self.noise[0]
                 else:
