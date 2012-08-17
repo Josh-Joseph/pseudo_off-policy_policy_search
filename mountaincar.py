@@ -69,11 +69,11 @@ class Mountaincar(rl_tools.Domain):
             #slip = 0 if x < .25 else -np.sign(xdot)*self.noise[0]
             #slip = 0 if x < .25 else -np.sign(xdot)*self.noise[0]
             slip = 0
-            if -.25 < x < 0:
+            if 0 < x < .5:
                 if xdot > 0:
-                    slip = max(-self.noise[0], -xdot)
-                else:
-                    slip = min(self.noise[0], -xdot)
+                    slip = max(-self.noise[0]*xdot, -xdot)
+                #else:
+                #    slip = min(self.noise[0], -xdot)
             #slip = 0 if x > -1 else -np.sign(xdot)*self.noise[0]
             if self.noise[1]:
                 s[0] = min(max(x+xdot + np.random.normal(loc=0, scale=self.noise[1]), self.bounds[0,0]), self.bounds[1,0])
