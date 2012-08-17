@@ -28,7 +28,7 @@ class Cartpole(rl_tools.Domain):
         self.true_pars = (1, 1, 1)
         self.optimization_pars = {'initial step size':np.array([5, 5, 5]),
                                   'start':np.array([1, 1, 1]),
-                                  'maximum evaluations':150,
+                                  'maximum evaluations':50,
                                   'only positive':True}
         #self.initial_par_search_space = [[p1, p2] for p1 in np.linspace(-0.003, -.002, 5) for p2 in np.linspace(2, 4, 5)] # TODO
         self.noise = input_pars
@@ -36,7 +36,7 @@ class Cartpole(rl_tools.Domain):
         self.state_centers = self.construct_discrete_policy_centers()
         self.dim_centers = rl_tools.split_states_on_dim(self.state_centers)
         self.pi_init = 1-np.int8((np.sign(self.state_centers[:,1]) + 1)/2)
-        self.training_data_random_start = False
+        self.training_data_random_start = True
 
     #def distance_fn(self, x1, u1, x2, u2):
     #    return 1e5*(u1 != u2) + np.sum(((x1-x2)/np.array([1e5, 0.4189, 10, 10]))**2, axis=1)
