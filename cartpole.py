@@ -36,7 +36,7 @@ class Cartpole(rl_tools.Domain):
         self.state_centers = self.construct_discrete_policy_centers()
         self.dim_centers = rl_tools.split_states_on_dim(self.state_centers)
         self.pi_init = 1-np.int8((np.sign(self.state_centers[:,1]) + 1)/2)
-        self.training_data_random_start = False
+        self.training_data_random_start = True
 
     #def distance_fn(self, x1, u1, x2, u2):
     #    return 1e5*(u1 != u2) + np.sum(((x1-x2)/np.array([1e5, 0.4189, 10, 10]))**2, axis=1)
