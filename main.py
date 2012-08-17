@@ -71,7 +71,7 @@ def evaluate_approach(method, problem, analysis, save_it=False):
                 elif method == 'random':
                     policy = domain.baseline_policy()
                 elif method == 'pops':
-                    smaller_data = [np.copy(d) for d in data[:n]]
+                    smaller_data = [d.copy(deep=True) for d in data[:n]]
                     policy = pops.best_policy(domain, smaller_data)
                     #policy = pops.best_policy(domain, data[:n])
                 elif method == 'max_likelihood_approx':
