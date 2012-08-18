@@ -10,6 +10,8 @@ XDOTMIN = -0.07
 XDOTMAX = 0.07
 INITSTATE = np.array([-np.pi / 2.0 / 3.0, 0.0])
 
+rnd_start = True
+print "[mountaincar]: Training random start is " + ("On" if rnd_start else "Off")
 
 class Mountaincar(rl_tools.Domain):
     def __init__(self, input_pars):
@@ -35,7 +37,7 @@ class Mountaincar(rl_tools.Domain):
         self.state_centers = self.construct_discrete_policy_centers()
         self.dim_centers = rl_tools.split_states_on_dim(self.state_centers)
         self.pi_init = None
-        self.training_data_random_start = True
+        self.training_data_random_start = rnd_start
 
     #def distance_fn(self, x1, u1, x2, u2):
     #    return 1e5*(u1 != u2) + np.sum(((x1-x2)/np.array([1.7, .14]))**2, axis=1)

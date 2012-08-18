@@ -5,8 +5,8 @@ import numpy as np
 import parallel
 
 #p = 5
-p = 5
-#print "[pops]: p is " + str(p)
+p = 10
+print "[pops]: p is " + str(p)
 
 def best_policy(domain, data):
     f = lambda pars: err_array(domain, pars, data)

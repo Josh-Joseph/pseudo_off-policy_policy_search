@@ -10,6 +10,9 @@ XDOTBOUND = 2
 THETADOTBOUND = 2
 INITSTATE = np.array([0, 0, 0, 0])
 
+rnd_start = True
+print "[cartpole]: Training random start is " + ("On" if rnd_start else "Off")
+
 class Cartpole(rl_tools.Domain):
     def __init__(self, input_pars):
         self.input_pars = input_pars
@@ -36,7 +39,7 @@ class Cartpole(rl_tools.Domain):
         self.state_centers = self.construct_discrete_policy_centers()
         self.dim_centers = rl_tools.split_states_on_dim(self.state_centers)
         self.pi_init = 1-np.int8((np.sign(self.state_centers[:,1]) + 1)/2)
-        self.training_data_random_start = True
+        self.training_data_random_start = rnd_start
 
     #def distance_fn(self, x1, u1, x2, u2):
     #    return 1e5*(u1 != u2) + np.sum(((x1-x2)/np.array([1e5, 0.4189, 10, 10]))**2, axis=1)
