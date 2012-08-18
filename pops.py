@@ -6,8 +6,8 @@ import parallel
 
 #p = 5
 #p = 10
-p = 20
-#p = 30
+#p = 20
+p = 30
 print "[pops]: p is " + str(p)
 
 def best_policy(domain, data):
