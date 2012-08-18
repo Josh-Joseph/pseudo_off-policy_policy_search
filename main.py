@@ -23,8 +23,8 @@ reload(cartpole)
 def evaluate_approach(method, problem, analysis, save_it=False):
 
     all_trials = range(5)
-    if method == 'true_model':
-        all_trials = [0]
+    #if method == 'true_model':
+        #all_trials = [0]
 
     if problem == 'cartpole':
         if analysis == 'misspecification':
@@ -54,7 +54,7 @@ def evaluate_approach(method, problem, analysis, save_it=False):
             # drag and noise on xdot
             all_drag_mu = [.02] #np.arange(0,1.1,.1)
             all_drag_sig = [.005]
-            all_n = [100, 250, 500, 750, 1000, 1500, 2000, 2500, 5000, 7500, 10000]
+            all_n = [50, 100, 250, 500, 750, 1000, 1500, 2000, 2500, 5000]
         domains = [mountaincar.Mountaincar((drag_mu, drag_sig)) for drag_sig in all_drag_sig for drag_mu in all_drag_mu]
 
     print "[main.evaluate_approach]: Evaluating the performance of " + method + " ..."
