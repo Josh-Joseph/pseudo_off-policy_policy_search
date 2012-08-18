@@ -35,7 +35,7 @@ def evaluate_approach(method, problem, analysis, save_it=False):
             all_wind = [.2]
             all_sig = [.01]
             #all_n = [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 7500, 10000, 15000, 20000, 25000]
-            all_n = [1000, 2500, 5000, 7500, 10000, 15000, 20000, 25000]
+            all_n = [500, 1000, 2500, 5000, 7500, 10000, 15000, 20000, 25000]
         domains = [cartpole.Cartpole((wind, sig)) for sig in all_sig for wind in all_wind]
     elif problem == 'mountaincar':
         if analysis == 'misspecification':
@@ -54,7 +54,7 @@ def evaluate_approach(method, problem, analysis, save_it=False):
             # drag and noise on xdot
             all_drag_mu = [.02] #np.arange(0,1.1,.1)
             all_drag_sig = [.005]
-            all_n = [10, 50, 100, 250, 500, 750, 1000, 1500, 2000, 2500, 5000, 7500, 10000]
+            all_n = [100, 250, 500, 750, 1000, 1500, 2000, 2500, 5000, 7500, 10000]
         domains = [mountaincar.Mountaincar((drag_mu, drag_sig)) for drag_sig in all_drag_sig for drag_mu in all_drag_mu]
 
     print "[main.evaluate_approach]: Evaluating the performance of " + method + " ..."

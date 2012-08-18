@@ -45,7 +45,7 @@ def state_space_meshgrid(list_of_binned_states):
     return state_centers
 
 gamma = .99
-print "[rl_tools]: A gamma of " + str(gamma) + " is used for value iteration."
+#print "[rl_tools]: A gamma of " + str(gamma) + " is used for value iteration."
 def value_iteration(T, state_centers, reward_fn, threshold=1e-5, pi_init=None):
     if scipy.sparse.issparse(T[0]):
         n_actions = len(T)
