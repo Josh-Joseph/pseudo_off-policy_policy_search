@@ -255,5 +255,5 @@ class Mountaincar(rl_tools.Domain):
 #print "[mountaincar]: only noise on xdot !!!!!!!!!!!!!!"
 #print "[mountaincar]: noise and slip on x !!!!!!!!!!!!!!"
 #print "[mountaincar]: noise and constant slip on xdot !!!!!!!!!!!!!!"
-print "[mountaincar]: noise on x, slip on xdot !!!!!!!!!!!!!!"
+#print "[mountaincar]: noise on x, slip on xdot !!!!!!!!!!!!!!"
 
