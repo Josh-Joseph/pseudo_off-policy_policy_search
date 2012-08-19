@@ -7,10 +7,14 @@ import parallel
 #p = 5
 #p = 10
 #p = 20
-p = 30
+#p = 30
 #p = 50
 
-print "[pops]: p is " + str(p)
+#print "[pops]: p is " + str(p)
+
+p_adaptive = .001
+
+print "[pops]: p is adaptive with p_adaptive = " + str(p_adaptive)
 
 def best_policy(domain, data):
     f = lambda pars: err_array(domain, pars, data)
@@ -31,7 +35,7 @@ def best_policy(domain, data):
     return discrete_policy(domain, states_to_actions)
 
 def mfmc_evaluation(policy, data, distance_fn, initstate, episode_length, goal_check):
-    #p = max(int(np.ceil(len(data)*.005)), 5)
+    p = max(int(np.ceil(len(data)*p_adaptive)), 5)
     n_states, n_dims = policy.state_centers.shape
     u_dict = {}
     x_array = []
