@@ -28,8 +28,8 @@ def evaluate_approach(method, problem, analysis, save_it=False):
 
     if problem == 'cartpole':
         if analysis == 'misspecification':
-            #all_wind = np.arange(0,2.1,.1)
-            all_wind = [.2]
+            all_wind = np.arange(0,2.1,.1)
+            #all_wind = [.2]
             all_sig = [.01]
             all_n = [10000]
         elif analysis == 'sample_complexity':
