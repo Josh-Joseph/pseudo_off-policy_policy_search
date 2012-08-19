@@ -5,9 +5,11 @@ import numpy as np
 import parallel
 
 #p = 5
-#p = 10
+p = 10
 #p = 20
-p = 30
+#p = 30
+#p = 50
+
 print "[pops]: p is " + str(p)
 
 def best_policy(domain, data):
