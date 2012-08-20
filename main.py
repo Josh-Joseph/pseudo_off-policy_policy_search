@@ -55,7 +55,7 @@ def evaluate_approach(method, problem, analysis, save_it=False):
             # drag and noise on xdot
             all_drag_mu = [.02] #np.arange(0,1.1,.1)
             all_drag_sig = [.005]
-            all_n = [50, 100, 250, 500, 750, 1000, 1500, 2000, 2500, 5000]
+            all_n = [50, 100, 250, 500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000]
         domains = [mountaincar.Mountaincar((drag_mu, drag_sig)) for drag_sig in all_drag_sig for drag_mu in all_drag_mu]
 
     print "[main.evaluate_approach]: Evaluating the performance of " + method + " ..."
@@ -121,13 +121,13 @@ def plot_results(problem, analysis):
         plt.figure()
         for key in store.keys():
             x = np.sort(list(set([pars[0] for pars in store[key].index])))
-            if key == 'true_model':
-                y = [np.mean(store[key].values) for i in x]
-                plt.plot(x, y, linewidth=2, label=key)
-            else:
-                y = [np.mean(store[key].ix[i].values) for i in x]
-                yerr = [np.std(store[key].ix[i].values)/np.sqrt(len(store[key].ix[i].values)) for i in x]
-                plt.errorbar(x, y, yerr=yerr, linewidth=2, label=key)
+            #if key == 'true_model':
+            #    y = [np.mean(store[key].values) for i in x]
+            #    plt.plot(x, y, linewidth=2, label=key)
+            #else:
+            y = [np.mean(store[key].ix[i].values) for i in x]
+            yerr = [np.std(store[key].ix[i].values)/np.sqrt(len(store[key].ix[i].values)) for i in x]
+            plt.errorbar(x, y, yerr=yerr, linewidth=2, label=key)
             plt.legend()
             plt.xlabel('training data size')
             plt.ylabel('expected total reward')
