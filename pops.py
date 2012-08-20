@@ -12,7 +12,7 @@ import parallel
 
 #print "[pops]: p is " + str(p)
 
-p_adaptive = .005
+p_adaptive = .001
 
 print "[pops]: p is adaptive with p_adaptive = " + str(p_adaptive)
 
