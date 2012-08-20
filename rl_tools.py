@@ -174,7 +174,7 @@ def err_array(domain, pars, data):
 
 def hill_climb(fn, optimization_pars, ml_start=None):
     # fn must return [input, fn(input)] with input as a tuple
-    step = optimization_pars['initial step size']
+    step = np.copy(optimization_pars['initial step size'])
     eval_record = {}
     new_inputs = []
     new_inputs.append(np.copy(optimization_pars['start']))
