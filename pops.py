@@ -12,7 +12,7 @@ import parallel
 
 #print "[pops]: p is " + str(p)
 
-p_adaptive = .01
+p_adaptive = .005
 
 print "[pops]: p is adaptive with p_adaptive = " + str(p_adaptive)
 
@@ -49,9 +49,9 @@ def mfmc_evaluation(policy, data, distance_fn, initstate, episode_length, goal_c
     for n in range(len(data)):
         for a_i in range(len(policy.action_centers)):
             this_action_inds = np.where(data[n]['u'].values[:-1] == policy.action_centers[a_i])[0]
-            x_array[a_i] = np.append(x_array[a_i], data[n].values[this_action_inds,:-2].copy(), axis=0)
-            xnext_array[a_i] = np.append(xnext_array[a_i], data[n].values[this_action_inds+1,:-2].copy(), axis=0)
-            r_array[a_i] = np.append(r_array[a_i], data[n].values[this_action_inds,-1].copy())
+            x_array[a_i] = np.append(x_array[a_i], np.copy(data[n].values[this_action_inds,:-2]), axis=0)
+            xnext_array[a_i] = np.append(xnext_array[a_i], np.copy(data[n].values[this_action_inds+1,:-2]), axis=0)
+            r_array[a_i] = np.append(r_array[a_i], np.copy(data[n].values[this_action_inds,-1]))
         #reconstructed_data = []
     total_return = 0.0
     for i in range(p):

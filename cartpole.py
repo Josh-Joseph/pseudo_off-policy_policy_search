@@ -10,7 +10,7 @@ XDOTBOUND = 2
 THETADOTBOUND = 2
 INITSTATE = np.array([0, 0, 0, 0])
 
-rnd_start = False
+rnd_start = True
 print "[cartpole]: Training random start is " + ("On" if rnd_start else "Off")
 
 class Cartpole(rl_tools.Domain):
