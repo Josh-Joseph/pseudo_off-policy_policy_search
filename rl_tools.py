@@ -204,7 +204,7 @@ def hill_climb(fn, optimization_pars, ml_start=None):
             step /= 2.0
         else:
             center = np.copy(new_center)
-    print eval_record
+    #print eval_record
     return np.array(eval_record.keys()[np.argmax(eval_record.values())])
 
 
