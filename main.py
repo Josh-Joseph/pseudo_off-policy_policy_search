@@ -103,11 +103,11 @@ def plot_results(problem, analysis):
             for key in store.keys():
                 x = [pars[0] for pars in store['true_model'] if pars[1] == par]
                 y = [store[key][(xx, par)].mean() for xx in x]
-                if key == 'true_model':
-                    plt.plot(x, y, linewidth=2, label=key)
-                else:
-                    yerr = np.array([2*store[key][(xx, par)].std()/np.sqrt(len(store[key][(xx, par)])) for xx in x])
-                    plt.errorbar(x, y, yerr=yerr, linewidth=2, label=key)
+                #if key == 'true_model':
+                #    plt.plot(x, y, linewidth=2, label=key)
+                #else:
+                yerr = np.array([2*store[key][(xx, par)].std()/np.sqrt(len(store[key][(xx, par)])) for xx in x])
+                plt.errorbar(x, y, yerr=yerr, linewidth=2, label=key)
             plt.legend()
             plt.title("par[1] = " + str(par) + ", 95% confidence interval of the mean")
             plt.xlabel('par[0]')

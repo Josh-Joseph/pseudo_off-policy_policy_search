@@ -6,15 +6,15 @@ import parallel
 
 #p = 5
 #p = 10
-#p = 20
+p = 20
 #p = 30
 #p = 50
 
-#print "[pops]: p is " + str(p)
+print "[pops]: p is " + str(p)
 
-p_adaptive = .0005
+#p_adaptive = .0005
 
-print "[pops]: p is adaptive with p_adaptive = " + str(p_adaptive)
+#print "[pops]: p is adaptive with p_adaptive = " + str(p_adaptive)
 
 def best_policy(domain, data):
     f = lambda pars: err_array(domain, pars, data)
@@ -35,7 +35,7 @@ def best_policy(domain, data):
     return discrete_policy(domain, states_to_actions)
 
 def mfmc_evaluation(policy, data, distance_fn, initstate, episode_length, goal_check):
-    p = max(int(np.ceil(len(data)*p_adaptive)), 5)
+    #p = max(int(np.ceil(len(data)*p_adaptive)), 5)
     n_states, n_dims = policy.state_centers.shape
     u_dict = {}
     x_array = []
@@ -56,7 +56,7 @@ def mfmc_evaluation(policy, data, distance_fn, initstate, episode_length, goal_c
     total_return = 0.0
     for i in range(p):
         #reconstructed_data.append(pandas.DataFrame(index=range(episode_length), columns=data[0].columns))
-        x = initstate.copy()
+        x = np.copy(initstate)
         r = data[0]['r'][0]
         for t in range(episode_length):
             u = policy.get_action(x)
@@ -68,7 +68,7 @@ def mfmc_evaluation(policy, data, distance_fn, initstate, episode_length, goal_c
             data_index = np.argmin(distance_fn(x, x_array[a_i]))
             #x_array[data_index,:] = np.inf
             x_array[a_i][data_index,:] = np.inf
-            x = xnext_array[a_i][data_index]
+            x = np.copy(xnext_array[a_i][data_index])
             r = r_array[a_i][data_index]
             if goal_check(x):
                 break
