@@ -84,8 +84,8 @@ def evaluate_approach(method, problem, analysis, save_it=False):
                     raise Exception('Unknown policy learning method: ' + method)
                 results[domain.input_pars][n, trial] = domain.evaluate_policy(policy)
                 print str(domain.input_pars) + " - " + str(n) + " - " + str(results[domain.input_pars][n, trial])
-    if save_it:
-        save_results(method, problem, analysis, results)
+                if save_it:
+                    save_results(method, problem, analysis, results)
     return results
 
 def save_results(method, problem, analysis, results):
