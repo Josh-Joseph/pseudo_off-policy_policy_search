@@ -95,6 +95,8 @@ def save_results(method, problem, analysis, results):
     store.close()
 
 def plot_results(problem, analysis):
+    pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Misspecified', 'max_likelihood_approx' : 'ME Misspecified', 'max_likelihood_big_discrete' : 'ME Tabular'}
+    colors = {'true_model': 'g', 'pops' : 'b', 'max_likelihood_approx' : 'r', 'max_likelihood_big_discrete' : 'c'}
     store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
 
     if analysis == 'misspecification':
@@ -107,14 +109,17 @@ def plot_results(problem, analysis):
                 #    plt.plot(x, y, linewidth=2, label=key)
                 #else:
                 yerr = np.array([2*store[key][(xx, par)].std()/np.sqrt(len(store[key][(xx, par)])) for xx in x])
-                plt.errorbar(x, y, yerr=yerr, linewidth=2, label=key)
-            plt.legend()
-            plt.title("par[1] = " + str(par) + ", 95% confidence interval of the mean")
-            plt.xlabel('par[0]')
-            plt.ylabel('expected total reward')
+                plt.errorbar(x, y, yerr=yerr, linewidth=2, color=colors[key], label=pretty_labels[key])
+            plt.title("Performance vs Model Misspecification")
+            plt.ylabel('Average Total Reward')
             if problem == 'mountaincar':
+                plt.xlabel('c')
+                plt.legend()
+                plt.xlim((0,.05))
                 plt.ylim((-500,0))
             else:
+                plt.xlabel('f')
+                plt.legend()
                 plt.xlim((0,1))
                 plt.ylim((0,500))
     elif analysis == 'sample_complexity':
@@ -126,14 +131,15 @@ def plot_results(problem, analysis):
             #    plt.plot(x, y, linewidth=2, label=key)
             #else:
             y = [np.mean(store[key].ix[i].values) for i in x]
-            yerr = [np.std(store[key].ix[i].values)/np.sqrt(len(store[key].ix[i].values)) for i in x]
-            plt.errorbar(x, y, yerr=yerr, linewidth=2, label=key)
-            plt.legend()
-            plt.xlabel('training data size')
-            plt.ylabel('expected total reward')
+            yerr = [2*np.std(store[key].ix[i].values)/np.sqrt(len(store[key].ix[i].values)) for i in x]
+            plt.errorbar(x, y, yerr=yerr, linewidth=2, color=colors[key], label=pretty_labels[key])
+            plt.xlabel('Episodes of Training Data')
+            plt.ylabel('Average Total Reward')
             if problem == 'mountaincar':
-                plt.ylim((-500,0))
+                plt.legend(loc=4)
+                plt.ylim((-500,-100))
             else:
+                plt.legend()
                 plt.ylim((0,500))
 
     store.close()

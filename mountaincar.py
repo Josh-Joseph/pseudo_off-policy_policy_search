@@ -108,7 +108,7 @@ class Mountaincar(rl_tools.Domain):
                 s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)) + self.noise[0] + np.random.normal(loc=0, scale=self.noise[1]), self.bounds[0,1]), self.bounds[1,1])
             else:
                 s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)) + self.noise[0], self.bounds[0,1]), self.bounds[1,1])
-        elif 1:
+        elif 0:
             #noise and slip on x
             #slip = 0 if x < -0.5235987755982988 else self.noise[0]*(self.true_pars[0]*np.cos(self.true_pars[1]*x))
             slip = 0
