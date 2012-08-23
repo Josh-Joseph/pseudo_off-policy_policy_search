@@ -50,7 +50,7 @@ def evaluate_approach(method, problem, analysis, save_it=False):
             all_drag_mu = [0, .005, .01, .015, .02, .025, .03, .035, .04, .045, .05] # % slip on xdot
             #all_drag_mu = [0, .001, .005, .01,.05, .1, .15, .175, .2, .25, .3] # % slip on xdot
             all_drag_sig = [.005]
-            all_n = [1000]
+            all_n = [2000]
         elif analysis == 'sample_complexity':
             # drag and noise on xdot
             all_drag_mu = [.02] #np.arange(0,1.1,.1)
@@ -95,7 +95,7 @@ def save_results(method, problem, analysis, results):
     store.close()
 
 def plot_results(problem, analysis):
-    pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Misspecified', 'max_likelihood_approx' : 'ME Misspecified', 'max_likelihood_big_discrete' : 'ME Tabular'}
+    pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Misspecified', 'max_likelihood_approx' : 'MSE Misspecified', 'max_likelihood_big_discrete' : 'MSE Tabular'}
     colors = {'true_model': 'g', 'pops' : 'b', 'max_likelihood_approx' : 'r', 'max_likelihood_big_discrete' : 'c'}
     store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
 
@@ -120,7 +120,7 @@ def plot_results(problem, analysis):
             else:
                 plt.xlabel('f')
                 plt.legend()
-                plt.xlim((0,1))
+                plt.xlim((0,2))
                 plt.ylim((0,500))
     elif analysis == 'sample_complexity':
         plt.figure()
@@ -130,8 +130,8 @@ def plot_results(problem, analysis):
             #    y = [np.mean(store[key].values) for i in x]
             #    plt.plot(x, y, linewidth=2, label=key)
             #else:
-            y = [np.mean(store[key].ix[i].values) for i in x]
-            yerr = [2*np.std(store[key].ix[i].values)/np.sqrt(len(store[key].ix[i].values)) for i in x]
+            y = [store[key].ix[i].mean().values[0] for i in x]
+            yerr = [2*store[key].ix[i].std().values[0]/np.sqrt(len(store[key].ix[i].values)) for i in x]
             plt.errorbar(x, y, yerr=yerr, linewidth=2, color=colors[key], label=pretty_labels[key])
             plt.xlabel('Episodes of Training Data')
             plt.ylabel('Average Total Reward')
