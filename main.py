@@ -22,7 +22,7 @@ reload(cartpole)
 
 def evaluate_approach(method, problem, analysis, save_it=False):
 
-    all_trials = range(5)
+    all_trials = range(10)
     #if method == 'true_model':
         #all_trials = [0]
 
@@ -133,13 +133,14 @@ def plot_results(problem, analysis):
             y = [store[key].ix[i].mean().values[0] for i in x]
             yerr = [2*store[key].ix[i].std().values[0]/np.sqrt(len(store[key].ix[i].values)) for i in x]
             plt.errorbar(x, y, yerr=yerr, linewidth=2, color=colors[key], label=pretty_labels[key])
+            plt.title("Performance vs Training Data Size")
             plt.xlabel('Episodes of Training Data')
             plt.ylabel('Average Total Reward')
             if problem == 'mountaincar':
                 plt.legend(loc=4)
                 plt.ylim((-500,-100))
             else:
-                plt.legend()
+                plt.legend(loc=4)
                 plt.ylim((0,500))
 
     store.close()
