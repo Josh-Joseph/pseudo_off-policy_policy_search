@@ -22,7 +22,7 @@ reload(cartpole)
 
 def evaluate_approach(method, problem, analysis, save_it=False):
 
-    all_trials = range(10)
+    all_trials = range(20)
     #if method == 'true_model':
         #all_trials = [0]
 

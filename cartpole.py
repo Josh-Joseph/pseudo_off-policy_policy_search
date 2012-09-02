@@ -31,7 +31,7 @@ class Cartpole(rl_tools.Domain):
         self.true_pars = (1, 1, 1)
         self.optimization_pars = {'initial step size':np.array([.9, .9, .9]),
                                   'start':np.array([1, 1, 1]),
-                                  'maximum evaluations':75,
+                                  'maximum evaluations':50,
                                   'only positive':True}
         #self.initial_par_search_space = [[p1, p2] for p1 in np.linspace(-0.003, -.002, 5) for p2 in np.linspace(2, 4, 5)] # TODO
         self.noise = input_pars
