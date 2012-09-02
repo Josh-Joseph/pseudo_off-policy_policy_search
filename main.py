@@ -89,7 +89,7 @@ def evaluate_approach(method, problem, analysis, save_it=False):
     return results
 
 def save_results(method, problem, analysis, results):
-    store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
+    store = pandas.HDFStore(problem + "_" + analysis + '_store_run3.h5')
     key = method # + ", " + datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
     store[key] = results
     store.close()

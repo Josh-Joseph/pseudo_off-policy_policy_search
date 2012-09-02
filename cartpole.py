@@ -29,7 +29,7 @@ class Cartpole(rl_tools.Domain):
         self.n_xdot_centers = 30
         self.n_thetadot_centers = 30
         self.true_pars = (1, 1, 1)
-        self.optimization_pars = {'initial step size':np.array([3, 3, 3]),
+        self.optimization_pars = {'initial step size':np.array([.9, .9, .9]),
                                   'start':np.array([1, 1, 1]),
                                   'maximum evaluations':75,
                                   'only positive':True}
