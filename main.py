@@ -95,7 +95,10 @@ def save_results(method, problem, analysis, results):
     store.close()
 
 def plot_results(problem, analysis):
-    pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Misspecified', 'max_likelihood_approx' : 'MSE Misspecified', 'max_likelihood_big_discrete' : 'MSE Tabular'}
+    if problem == 'mountaincar':
+        pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Mountain Car', 'max_likelihood_approx' : 'MSE Standard Mountain Car', 'max_likelihood_big_discrete' : 'MSE Tabular'}
+    else:
+        pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Cart-pole', 'max_likelihood_approx' : 'MSE Standard Cart-pole', 'max_likelihood_big_discrete' : 'MSE Tabular'}
     colors = {'true_model': 'g', 'pops' : 'b', 'max_likelihood_approx' : 'r', 'max_likelihood_big_discrete' : 'c'}
     store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
 
@@ -108,17 +111,17 @@ def plot_results(problem, analysis):
                 #if key == 'true_model':
                 #    plt.plot(x, y, linewidth=2, label=key)
                 #else:
-                yerr = np.array([2*store[key][(xx, par)].std()/np.sqrt(len(store[key][(xx, par)])) for xx in x])
+                yerr = np.array([store[key][(xx, par)].std()/np.sqrt(len(store[key][(xx, par)])) for xx in x])
                 plt.errorbar(x, y, yerr=yerr, linewidth=2, color=colors[key], label=pretty_labels[key])
-            plt.title("Performance vs Model Misspecification")
+            #plt.title("Performance vs Model Misspecification")
             plt.ylabel('Average Total Reward')
             if problem == 'mountaincar':
-                plt.xlabel('c')
+                plt.xlabel('Influence of the Rock (c)')
                 plt.legend()
                 plt.xlim((0,.05))
                 plt.ylim((-500,0))
             else:
-                plt.xlabel('f')
+                plt.xlabel('Influence of the Wind (f)')
                 plt.legend()
                 plt.xlim((0,2))
                 plt.ylim((0,500))
@@ -131,9 +134,9 @@ def plot_results(problem, analysis):
             #    plt.plot(x, y, linewidth=2, label=key)
             #else:
             y = [store[key].ix[i].mean().values[0] for i in x]
-            yerr = [2*store[key].ix[i].std().values[0]/np.sqrt(len(store[key].ix[i].values)) for i in x]
+            yerr = [store[key].ix[i].std().values[0]/np.sqrt(len(store[key].ix[i].values)) for i in x]
             plt.errorbar(x, y, yerr=yerr, linewidth=2, color=colors[key], label=pretty_labels[key])
-            plt.title("Performance vs Training Data Size")
+            #plt.title("Performance vs Training Data Size")
             plt.xlabel('Episodes of Training Data')
             plt.ylabel('Average Total Reward')
             if problem == 'mountaincar':
@@ -142,5 +145,7 @@ def plot_results(problem, analysis):
             else:
                 plt.legend(loc=4)
                 plt.ylim((0,500))
+                plt.xlim((0,20000))
+                print "XLIM WAS MODIFIED!!!!"
 
     store.close()
