@@ -36,7 +36,7 @@ def evaluate_approach(method, problem, analysis, save_it=False):
             all_wind = [.2]
             all_sig = [.01]
             #all_n = [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 7500, 10000, 15000, 20000, 25000]
-            all_n = [50, 100, 250, 500, 1000, 1500, 2500, 5000, 7500, 10000, 15000, 20000, 25000]
+            all_n = [50, 100, 250, 500, 1000, 1500, 2500, 5000, 7500, 10000, 15000]#, 20000, 25000]
         domains = [cartpole.Cartpole((wind, sig)) for sig in all_sig for wind in all_wind]
     elif problem == 'mountaincar':
         if analysis == 'misspecification':
@@ -96,9 +96,9 @@ def save_results(method, problem, analysis, results):
 
 def plot_results(problem, analysis):
     if problem == 'mountaincar':
-        pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Mountain Car', 'max_likelihood_approx' : 'MSE Standard Mountain Car', 'max_likelihood_big_discrete' : 'MSE Tabular'}
+        pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Mountain Car', 'max_likelihood_approx' : 'ML Standard Mountain Car', 'max_likelihood_big_discrete' : 'ML Tabular'}
     else:
-        pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Cart-pole', 'max_likelihood_approx' : 'MSE Standard Cart-pole', 'max_likelihood_big_discrete' : 'MSE Tabular'}
+        pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Cart-pole', 'max_likelihood_approx' : 'ML Standard Cart-pole', 'max_likelihood_big_discrete' : 'ML Tabular'}
     colors = {'true_model': 'g', 'pops' : 'b', 'max_likelihood_approx' : 'r', 'max_likelihood_big_discrete' : 'c'}
     store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
 
