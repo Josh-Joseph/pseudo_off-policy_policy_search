@@ -16,7 +16,7 @@ print "[mountaincar]: Training random start is " + ("On" if rnd_start else "Off"
 class Mountaincar(rl_tools.Domain):
     def __init__(self, input_pars):
         self.input_pars = input_pars
-        self.N_MC_eval_samples = 250
+        self.N_MC_eval_samples = 1
         self.episode_length = 500
         self.data_columns = ('x','xdot','u','r') # assume the 2nd to last is u and the last is r
         self.n_dim = 2
@@ -67,7 +67,7 @@ class Mountaincar(rl_tools.Domain):
             else:
                 s[0] = min(max(x+xdot, self.bounds[0,0]), self.bounds[1,0])
             slip = 0
-            if x < .25 <= s[0]:
+            if (np.sign(x-.25) != np.sign(s[0]-.25)) or (np.sign(x-.75) != np.sign(s[0]-.75)): # rocks at -.25, .25, .75
                 if xdot > 0:
                     slip = max(-self.noise[0], -xdot)
                 else:
