@@ -1,5 +1,6 @@
 import numpy as np
 import pandas
+import os
 from datetime import datetime
 import matplotlib.pyplot as plt
 import parallel
@@ -60,10 +61,7 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
 
     print "[main.evaluate_approach]: Evaluating the performance of " + method + " ..."
     index = pandas.MultiIndex.from_tuples([(n, trial) for n in all_n for trial in all_trials])
-    try:
-        results = load_results(method, problem, analysis)
-    except:
-        results = pandas.DataFrame(index=index, columns=[domain.input_pars for domain in domains])
+    results = pandas.DataFrame(index=index, columns=[domain.input_pars for domain in domains])
     for trial in all_trials:
         if trial < trial_start:
             continue
@@ -88,7 +86,8 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
                 else:
                     raise Exception('Unknown policy learning method: ' + method)
                 result = domain.evaluate_policy(policy)
-                results = load_results(method, problem, analysis)
+                if problem + "_" + analysis + '_store_run3.h5' in os.listdir('.'):
+                    results = load_results(method, problem, analysis)
                 results[domain.input_pars][n, trial] = result
                 print str(domain.input_pars) + " - " + str(n) + " - " + str(results[domain.input_pars][n, trial])
                 if save_it:
