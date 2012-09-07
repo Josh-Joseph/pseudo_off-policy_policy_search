@@ -24,15 +24,15 @@ class Mountaincar(rl_tools.Domain):
         self.goal = np.array([[-np.inf, XMAX],[-np.inf, np.inf]]).transpose()
         self.initstate = INITSTATE
         self.action_centers = np.array([-1, 1])
-        self.n_x_centers = 300
-        self.n_xdot_centers = 300
+        self.n_x_centers = 100
+        self.n_xdot_centers = 100
         self.true_pars = (-0.0025, 3)
         self.initial_par_search_space = [[p1, p2] for p1 in np.linspace(-0.003, -.002, 5) for p2 in np.linspace(2, 4, 5)]
         self.noise = input_pars
         self.value_iteration_threshold = 1e-5
         self.optimization_pars = {'initial step size':np.array([.0024, 1]),
                                   'start':np.array([-0.0025, 3]),
-                                  'maximum evaluations':75,
+                                  'maximum evaluations':50,
                                   'only positive':False}
         self.state_centers = self.construct_discrete_policy_centers()
         self.dim_centers = rl_tools.split_states_on_dim(self.state_centers)
