@@ -24,8 +24,8 @@ class Mountaincar(rl_tools.Domain):
         self.goal = np.array([[-np.inf, XMAX],[-np.inf, np.inf]]).transpose()
         self.initstate = INITSTATE
         self.action_centers = np.array([-1, 1])
-        self.n_x_centers = 100
-        self.n_xdot_centers = 100
+        self.n_x_centers = 150
+        self.n_xdot_centers = 150
         self.true_pars = (-0.0025, 3)
         self.initial_par_search_space = [[p1, p2] for p1 in np.linspace(-0.003, -.002, 5) for p2 in np.linspace(2, 4, 5)]
         self.noise = input_pars
