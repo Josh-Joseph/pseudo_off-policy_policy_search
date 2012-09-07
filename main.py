@@ -20,7 +20,7 @@ reload(cartpole)
 # .0025 mud drag constant in mountaincar
 
 
-def evaluate_approach(method, problem, analysis, save_it=False):
+def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
 
     all_trials = range(20)
     #if method == 'true_model':
@@ -60,8 +60,13 @@ def evaluate_approach(method, problem, analysis, save_it=False):
 
     print "[main.evaluate_approach]: Evaluating the performance of " + method + " ..."
     index = pandas.MultiIndex.from_tuples([(n, trial) for n in all_n for trial in all_trials])
-    results = pandas.DataFrame(index=index, columns=[domain.input_pars for domain in domains])
+    try:
+        results = load_results(method, problem, analysis)
+    except:
+        results = pandas.DataFrame(index=index, columns=[domain.input_pars for domain in domains])
     for trial in all_trials:
+        if trial < trial_start:
+            continue
         for domain in domains:
             if method != 'true_model':
                 data = domain.generate_batch_data(N=np.max(all_n))
@@ -82,7 +87,9 @@ def evaluate_approach(method, problem, analysis, save_it=False):
                     policy = ml.discrete_model_policy(domain, data[:n])
                 else:
                     raise Exception('Unknown policy learning method: ' + method)
-                results[domain.input_pars][n, trial] = domain.evaluate_policy(policy)
+                result = domain.evaluate_policy(policy)
+                results = load_results(method, problem, analysis)
+                results[domain.input_pars][n, trial] = result
                 print str(domain.input_pars) + " - " + str(n) + " - " + str(results[domain.input_pars][n, trial])
                 if save_it:
                     save_results(method, problem, analysis, results)
@@ -93,6 +100,14 @@ def save_results(method, problem, analysis, results):
     key = method # + ", " + datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
     store[key] = results
     store.close()
+
+def load_results(method, problem, analysis):
+    store = pandas.HDFStore(problem + "_" + analysis + '_store_run3.h5')
+    key = method # + ", " + datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
+    results = store[key]
+    store.close()
+    return results
+
 
 def plot_results(problem, analysis):
     if problem == 'mountaincar':
