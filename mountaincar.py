@@ -67,7 +67,8 @@ class Mountaincar(rl_tools.Domain):
             else:
                 s[0] = min(max(x+xdot, self.bounds[0,0]), self.bounds[1,0])
             slip = 0
-            if x < .25 <= s[0]:
+            #if x < .25 <= s[0]:
+            if (np.sign(x-.25) != np.sign(s[0]-.25)) or (np.sign(x-.75) != np.sign(s[0]-.75)): # rocks at -.25, .25, .75
                 if xdot > 0:
                     slip = max(-self.noise[0], -xdot)
                 else:
@@ -132,7 +133,8 @@ class Mountaincar(rl_tools.Domain):
         if 1:
             s[0] = min(max(x+xdot, self.bounds[0,0]), self.bounds[1,0])
             slip = 0
-            if x < .25 <= s[0]:
+            #if x < .25 <= s[0]:
+            if (np.sign(x-.25) != np.sign(s[0]-.25)) or (np.sign(x-.75) != np.sign(s[0]-.75)): # rocks at -.25, .25, .75
                 if xdot > 0:
                     slip = max(-self.noise[0], -xdot)
                 else:

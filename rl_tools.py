@@ -138,6 +138,7 @@ def stochastic_continuous_to_discrete_model(domain):
     T = [scipy.sparse.lil_matrix((n_states, n_states)) for a in domain.action_centers]
     for a_i in range(n_actions):
         for s_i in range(n_states-1):
+            print s_i
             if domain.at_goal(domain.state_centers[s_i]):
                 T[a_i][s_i,n_states-1] = 1.0 # absorbing state
             else:
