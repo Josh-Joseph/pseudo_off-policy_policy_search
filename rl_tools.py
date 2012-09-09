@@ -132,7 +132,7 @@ def deterministic_continuous_to_discrete_model(dynamics, state_centers, action_c
         T[n_states-1][a_i] = n_states-1 # absorbing state
     return T
 
-def stochastic_continuous_to_discrete_model(domain):
+def stochastic_continuous_to_discrete_model(domain, pars=None):
     n_states, n_dims = domain.state_centers.shape
     n_actions, = domain.action_centers.shape
     T = [scipy.sparse.lil_matrix((n_states, n_states)) for a in domain.action_centers]
@@ -141,7 +141,7 @@ def stochastic_continuous_to_discrete_model(domain):
             if domain.at_goal(domain.state_centers[s_i]):
                 T[a_i][s_i,n_states-1] = 1.0 # absorbing state
             else:
-                tmp_pmf = domain.true_dynamics_pmf(s_i, a_i)
+                tmp_pmf = domain.true_dynamics_pmf(s_i, a_i) if pars is None else domain.approx_dynamics_pmf(s_i, a_i, pars)
                 inds = np.where(tmp_pmf > 0.0)[0]
                 T[a_i][s_i,inds] = tmp_pmf[inds]
         T[a_i][n_states-1,n_states-1] = 1.0 # absorbing state
@@ -153,8 +153,9 @@ def discrete_policy(domain, states_to_actions=None):
     return policy_representations.Discrete_policy(domain.state_centers, domain.action_centers, states_to_actions)
 
 def policy_wrt_approx_model(domain, pars):
-    dynamics = lambda s, u: domain.approx_dynamics(s, u, pars)
-    T = deterministic_continuous_to_discrete_model(dynamics, domain.state_centers, domain.action_centers, domain.at_goal)
+    #dynamics = lambda s, u: domain.approx_dynamics(s, u, pars)
+    #T = deterministic_continuous_to_discrete_model(dynamics, domain.state_centers, domain.action_centers, domain.at_goal)
+    T = stochastic_continuous_to_discrete_model(domain, pars)
     states_to_actions, V = value_iteration(T, domain.state_centers, domain.reward, threshold=domain.value_iteration_threshold)
     return discrete_policy(domain, states_to_actions)
 
@@ -184,7 +185,7 @@ def hill_climb(fn, optimization_pars, ml_start=None):
     for out in all_out:
         eval_record[out[0]] = out[1]
     center = eval_record.keys()[np.argmax(eval_record.values())]
-    #print eval_record
+    print eval_record
     while len(eval_record.keys()) < optimization_pars['maximum evaluations'] and np.max(step) > 1e-6:
         #print "-----------"
         #print "[rl_tools.hill_climb]: step = " + str(step)
@@ -204,7 +205,7 @@ def hill_climb(fn, optimization_pars, ml_start=None):
             step /= 2.0
         else:
             center = np.copy(new_center)
-    #print eval_record
+    print eval_record
     return np.array(eval_record.keys()[np.argmax(eval_record.values())])
 
 
@@ -247,6 +248,7 @@ class Domain:
         self.dim_centers = split_states_on_dim(self.state_centers)
         self.pi_init = None
         self.training_data_random_start = True
+        self.start_distribution = None
 
     def construct_discrete_policy_centers(self):
         if self.n_dim == 2:
@@ -288,11 +290,12 @@ class Domain:
     def simulate_episode(self, policy=None):
         np.random.seed(int(1e6*time.time()))
         episode_data = pandas.DataFrame(index=range(self.episode_length), columns=self.data_columns)
-        s = self.initstate.copy()
-        if policy is None: # create batch training data
-            policy = discrete_policy(self)
-            if self.training_data_random_start:
-                s = np.random.random(self.n_dim) * np.diff(self.bounds, axis=0)[0] + self.bounds[0,:]
+        #s = self.initstate.copy()
+        #if policy is None: # create batch training data
+        #    policy = discrete_policy(self)
+        #    if self.training_data_random_start:
+        #        s = np.random.random(self.n_dim) * np.diff(self.bounds, axis=0)[0] + self.bounds[0,:]
+        s = np.random.random(self.n_dim) * np.diff(self.start_distribution, axis=0)[0] + self.start_distribution[0,:]
         for t in range(self.episode_length):
             u = policy.get_action(s)
             for col_i in range(self.n_dim):

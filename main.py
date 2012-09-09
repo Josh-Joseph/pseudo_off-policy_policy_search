@@ -42,19 +42,13 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
     elif problem == 'mountaincar':
         if analysis == 'misspecification':
             # drag and noise on xdot
-            #all_drag_mu = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
-            #all_drag_mu = [0, .0001, .0005, .001, .005]
-            #all_drag_mu = [0, .0001, .0005, .001, .006, .007, .008] $ muddy everywhere
-            #all_drag_mu = [0, .01, .02, .03, .04, .05, .06, .07, .08, .09, .1] # muddy circle
-            #all_drag_mu = [0, .01, .02, .03, .04, .05, .06, .07, .08, .09, .1] # muddy top of the right hill on x
-            #all_drag_mu = [0, .001, .002, .003, .004, .005, .006, .007, .008, .009, .01] # muddy top of the right hill on xdot
-            all_drag_mu = [0, .005, .01, .015, .02, .025, .03, .035, .04, .045, .05] # % slip on xdot
-            #all_drag_mu = [0, .001, .005, .01,.05, .1, .15, .175, .2, .25, .3] # % slip on xdot
-            all_drag_sig = [.005]
+            #all_drag_mu = [0, .005, .01, .015, .02, .025, .03, .035, .04, .045, .05]
+            all_drag_mu = [0, .001, .002, .003, .004, .005, .006, .007, .008, .009, .01]
+            all_drag_sig = [0]
             all_n = [2000]
         elif analysis == 'sample_complexity':
             # drag and noise on xdot
-            all_drag_mu = [.02] #np.arange(0,1.1,.1)
+            all_drag_mu = [.02]
             all_drag_sig = [.005]
             all_n = [50, 100, 250, 500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000]
         domains = [mountaincar.Mountaincar((drag_mu, drag_sig)) for drag_sig in all_drag_sig for drag_mu in all_drag_mu]
@@ -66,7 +60,7 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
         if trial < trial_start:
             continue
         for domain in domains:
-            if method != 'true_model':
+            if method != 'true_model' and method != 'best_model':
                 data = domain.generate_batch_data(N=np.max(all_n))
             for n in all_n:
                 if method == 'true_model':
