@@ -114,7 +114,7 @@ def plot_results(problem, analysis):
     else:
         pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Cart-pole', 'max_likelihood_approx' : 'ML Standard Cart-pole', 'max_likelihood_big_discrete' : 'ML Tabular'}
     colors = {'true_model': 'g', 'pops' : 'b', 'max_likelihood_approx' : 'r', 'max_likelihood_big_discrete' : 'c'}
-    store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
+    store = pandas.HDFStore(problem + "_" + analysis + '_store_run3.h5')
 
     if analysis == 'misspecification':
         for par in list(set([pars[1] for pars in store['true_model']])):
