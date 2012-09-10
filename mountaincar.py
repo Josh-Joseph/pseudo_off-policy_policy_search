@@ -13,7 +13,7 @@ INITSTATE = np.array([-np.pi / 2.0 / 3.0, 0.0])
 rnd_start = True
 print "[mountaincar]: Training random start is " + ("On" if rnd_start else "Off")
 
-grid_size = [300,300]
+grid_size = [200,200]
 print "[mountaincar]: Using a grid size of: " + str(grid_size)
 
 
@@ -42,7 +42,7 @@ class Mountaincar(rl_tools.Domain):
         self.dim_centers = rl_tools.split_states_on_dim(self.state_centers)
         self.pi_init = None
         self.training_data_random_start = rnd_start
-        self.rock_locations = INITSTATE[0] + np.linspace(-.8,1,5)
+        self.rock_locations = INITSTATE[0] + np.linspace(-np.pi / 2.0 / 3.0,.5,5)
         self.start_distribution =  np.array([[INITSTATE[0], INITSTATE[0]],[INITSTATE[1], INITSTATE[1]]]).transpose()
         #self.start_distribution =  np.array([[INITSTATE[0]-.1, INITSTATE[0]+.1],[INITSTATE[1], INITSTATE[1]]]).transpose()
 
@@ -89,9 +89,9 @@ class Mountaincar(rl_tools.Domain):
         s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)), self.bounds[0,1]), self.bounds[1,1])
         if np.any(np.sign(self.rock_locations - x) != np.sign(self.rock_locations - s[0])):
             if s[1] > 0:
-                s[1] = max(s[1]-self.noise[0], 0.0)
+                s[1] = max(s[1]-s[1]*self.noise[0], 0.0)
             else:
-                s[1] = min(s[1]+self.noise[0], 0.0)
+                s[1] = min(s[1]-s[1]*self.noise[0], 0.0)
 
         return s
 
@@ -107,9 +107,9 @@ class Mountaincar(rl_tools.Domain):
         s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)), self.bounds[0,1]), self.bounds[1,1])
         if np.any(np.sign(self.rock_locations - x) != np.sign(self.rock_locations - s[0])):
             if s[1] > 0:
-                s[1] = max(s[1]-self.noise[0], 0.0)
+                s[1] = max(s[1]-s[1]*self.noise[0], 0.0)
             else:
-                s[1] = min(s[1]+self.noise[0], 0.0)
+                s[1] = min(s[1]-s[1]*self.noise[0], 0.0)
         s_next_i = rl_tools.find_nearest_index_fast(self.dim_centers, s)
         if self.noise[1]:
             supported_s = self.state_centers[:,1] == self.state_centers[s_next_i,1]
