@@ -13,14 +13,14 @@ INITSTATE = np.array([-np.pi / 2.0 / 3.0, 0.0])
 rnd_start = True
 print "[mountaincar]: Training random start is " + ("On" if rnd_start else "Off")
 
-grid_size = [200,200]
+grid_size = [300,300]
 print "[mountaincar]: Using a grid size of: " + str(grid_size)
 
 
 class Mountaincar(rl_tools.Domain):
     def __init__(self, input_pars):
         self.input_pars = input_pars
-        self.N_MC_eval_samples = 1
+        self.N_MC_eval_samples = 100
         self.episode_length = 500
         self.data_columns = ('x','xdot','u','r') # assume the 2nd to last is u and the last is r
         self.n_dim = 2
@@ -42,9 +42,9 @@ class Mountaincar(rl_tools.Domain):
         self.dim_centers = rl_tools.split_states_on_dim(self.state_centers)
         self.pi_init = None
         self.training_data_random_start = rnd_start
-        self.rock_locations = INITSTATE[0] + np.linspace(-np.pi / 2.0 / 3.0,.5,5)
-        self.start_distribution =  np.array([[INITSTATE[0], INITSTATE[0]],[INITSTATE[1], INITSTATE[1]]]).transpose()
-        #self.start_distribution =  np.array([[INITSTATE[0]-.1, INITSTATE[0]+.1],[INITSTATE[1], INITSTATE[1]]]).transpose()
+        self.rock_locations = INITSTATE[0] + np.linspace(0,.5,3)
+        #self.start_distribution =  np.array([[INITSTATE[0], INITSTATE[0]],[INITSTATE[1], INITSTATE[1]]]).transpose()
+        self.start_distribution =  np.array([[INITSTATE[0]-.1, INITSTATE[0]+.1],[INITSTATE[1], INITSTATE[1]]]).transpose()
 
     def distance_fn(self, x1, x2):
         return np.sum(((x1-x2)/np.array([1.7, .14]))**2, axis=1)
@@ -54,6 +54,16 @@ class Mountaincar(rl_tools.Domain):
 
     def reward(self, s):
         return -1 if s[0] < XMAX else 0
+
+    def approx_dynamics(self, s, u, pars):
+        s = s.copy()
+        x = s[0]
+        xdot = s[1]
+
+        s[0] = min(max(x+xdot, self.bounds[0,0]), self.bounds[1,0])
+        s[1] = min(max(xdot+0.001*u+(pars[0]*np.cos(pars[1]*x)), self.bounds[0,1]), self.bounds[1,1])
+        return s
+
 
     def approx_dynamics_pmf(self, s_i, a_i, pars):
         # returns a vector of probability masses the same size as state_centers
