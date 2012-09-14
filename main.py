@@ -52,8 +52,8 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
             #all_drag_mu = [0, .001, .002, .003, .004, .005, .006, .007, .008, .009, .01] # muddy top of the right hill on xdot
             all_drag_mu = [0, .005, .01, .015, .02, .025, .03, .035, .04, .045, .05] # % slip on xdot
             #all_drag_mu = [0, .001, .005, .01,.05, .1, .15, .175, .2, .25, .3] # % slip on xdot
-            all_drag_sig = [.005]
-            all_n = [2000]
+            all_drag_sig = [0]
+            all_n = [200]
         elif analysis == 'sample_complexity':
             # drag and noise on xdot
             all_drag_mu = [.02] #np.arange(0,1.1,.1)

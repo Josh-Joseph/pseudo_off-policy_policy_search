@@ -6,7 +6,7 @@ def approx_model_policy(domain, data):
     f = lambda pars: err_array(domain, pars, data)
     pars0 = domain.true_pars
     pars = leastsq(f, pars0)[0]
-    #print pars
+    print pars
     dynamics = lambda s, u: domain.approx_dynamics(s, u, pars)
     T = deterministic_continuous_to_discrete_model(dynamics, domain.state_centers, domain.action_centers, domain.at_goal)
     states_to_actions, V = value_iteration(T, domain.state_centers, domain.reward, threshold=domain.value_iteration_threshold, pi_init=domain.pi_init)
