@@ -25,7 +25,7 @@ reload(cartpole)
 
 def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
 
-    all_trials = range(20)
+    all_trials = range(5)
     #if method == 'true_model':
         #all_trials = [0]
 
@@ -45,7 +45,7 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
         if analysis == 'misspecification':
             # drag and noise on xdot
             #all_drag_mu = [0, .5, 1, 1.5, 2, 2.5, 3, 3.5, 4, 4.5, 5]
-            #all_drag_mu = [0, .0001, .0005, .001, .005] 
+            #all_drag_mu = [0, .0001, .0005, .001, .005]
             #all_drag_mu = [0, .0001, .0005, .001, .006, .007, .008] $ muddy everywhere
             #all_drag_mu = [0, .01, .02, .03, .04, .05, .06, .07, .08, .09, .1] # muddy circle
             #all_drag_mu = [0, .01, .02, .03, .04, .05, .06, .07, .08, .09, .1] # muddy top of the right hill on x
