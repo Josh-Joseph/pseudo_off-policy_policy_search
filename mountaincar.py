@@ -25,14 +25,14 @@ class Mountaincar(rl_tools.Domain):
         self.initstate = INITSTATE
         self.action_centers = np.array([-1, 1])
         self.n_x_centers = 300
-        self.n_xdot_centers = 200
-        self.true_pars = (-0.0025, 3, -0.0001, 3)
+        self.n_xdot_centers = 300
+        self.true_pars = (-0.0025, 3)
         self.initial_par_search_space = [[p1, p2] for p1 in np.linspace(-0.003, -.002, 5) for p2 in np.linspace(2, 4, 5)]
         self.noise = input_pars
         self.value_iteration_threshold = 1e-5
         self.optimization_pars = {'initial step size':np.array([.0024, 1]),
                                   'start':np.array([-0.0025, 3]),
-                                  'maximum evaluations':75,
+                                  'maximum evaluations':50,
                                   'only positive':False}
         self.state_centers = self.construct_discrete_policy_centers()
         self.dim_centers = rl_tools.split_states_on_dim(self.state_centers)
@@ -72,7 +72,7 @@ class Mountaincar(rl_tools.Domain):
         if x >= -1.6:
             s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)) + slip, self.bounds[0,1]), self.bounds[1,1])
         else:
-            s[1] = min(max(xdot+0.001*u+(self.true_pars[2]*np.cos(self.true_pars[3]*x)) + slip, self.bounds[0,1]), self.bounds[1,1])
+            s[1] = min(max(xdot+0.001*u+(-0.0001*np.cos(self.true_pars[1]*x)) + slip, self.bounds[0,1]), self.bounds[1,1])
         return s
 
     def true_dynamics_pmf(self, s_i, a_i):
