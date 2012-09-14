@@ -9,6 +9,8 @@ import mountaincar
 import cartpole
 import pops
 import ml
+from copy import deepcopy
+import csv
 
 reload(ml)
 reload(rl_tools)
@@ -37,7 +39,7 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
             all_wind = [.2]
             all_sig = [.01]
             #all_n = [5, 10, 25, 50, 100, 250, 500, 1000, 2500, 5000, 7500, 10000, 15000, 20000, 25000]
-            all_n = [50, 100, 250, 500, 1000, 1500, 2500, 5000, 7500, 10000, 15000, 20000, 25000]
+            all_n = [50, 100, 250, 500, 1000, 1500, 2500, 5000, 7500, 10000, 15000, 20000]
         domains = [cartpole.Cartpole((wind, sig)) for sig in all_sig for wind in all_wind]
     elif problem == 'mountaincar':
         if analysis == 'misspecification':
@@ -95,17 +97,81 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
     return results
 
 def save_results(method, problem, analysis, results):
-    store = pandas.HDFStore(problem + "_" + analysis + '_store_run3.h5')
+    store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
     key = method # + ", " + datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
     store[key] = results
     store.close()
 
 def load_results(method, problem, analysis):
-    store = pandas.HDFStore(problem + "_" + analysis + '_store_run3.h5')
+    store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
     key = method # + ", " + datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
     results = store[key]
     store.close()
     return results
+
+def write_data_to_csv():
+    all_analysis = {'misspecification','sample_complexity'}
+    all_problems = {'mountaincar','cartpole'}
+    for analysis in all_analysis:
+        for problem in all_problems:
+            if problem == 'mountaincar':
+                pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Mountain Car', 'max_likelihood_approx' : 'ML Standard Mountain Car', 'max_likelihood_big_discrete' : 'ML Tabular'}
+            else:
+                pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Cart-pole', 'max_likelihood_approx' : 'ML Standard Cart-pole', 'max_likelihood_big_discrete' : 'ML Tabular'}
+            store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
+            if analysis == 'misspecification':
+                for par in list(set([pars[1] for pars in store['true_model']])):
+                    data = {'n' : [str(pars[0]) for pars in store['true_model'] if pars[1] == par]}
+                    for key in store.keys():
+                        x = [pars[0] for pars in store['true_model'] if pars[1] == par]
+                        data[pretty_labels[key] + '_mu'] = [str(np.around(store[key][(xx, par)].mean(), decimals=2)) for xx in x]
+                        data[pretty_labels[key] + '_stderr'] = [str(np.around(store[key][(xx, par)].std()/np.sqrt(len(store[key][(xx, par)])), decimals=2)) for xx in x]
+                    keys = data.keys()
+                    keys.sort()
+                    print keys
+                    keys[1:] = keys[:-1]
+                    keys[0] = 'n'
+                    print keys
+                    file = open(problem + "_" + analysis + '.csv', 'w')
+                    wr = csv.writer(file, delimiter=',')
+                    row = deepcopy(keys)
+                    wr.writerow(row)
+                    file.close()
+                    for i in range(len(data[keys[0]])):
+                        row = []
+                        for key in keys:
+                            row.append(data[key][i])
+                        file = open(problem + "_" + analysis + '.csv', 'a')
+                        wr = csv.writer(file, delimiter=',')
+                        print row
+                        wr.writerow(row)
+                        file.close()
+            elif analysis == 'sample_complexity':
+                data = {'n' : [str(n) for n in np.sort(list(set([pars[0] for pars in store['true_model'].index])))]}
+                for key in store.keys():
+                    x = np.sort(list(set([pars[0] for pars in store[key].index])))
+                    data[pretty_labels[key] + '_mu'] = [str(np.around(store[key].ix[i].mean().values[0], decimals=2)) for i in x]
+                    data[pretty_labels[key] + '_stderr'] = [str(np.around(store[key].ix[i].std().values[0]/np.sqrt(len(store[key].ix[i].values)), decimals=2)) for i in x]
+                    keys = data.keys()
+                    keys.sort()
+                    print keys
+                    keys[1:] = keys[:-1]
+                    keys[0] = 'n'
+                    print keys
+                    file = open(problem + "_" + analysis + '.csv', 'w')
+                    wr = csv.writer(file, delimiter=',')
+                    row = deepcopy(keys)
+                    wr.writerow(row)
+                    file.close()
+                    for i in range(len(data[keys[0]])):
+                        row = []
+                        for key in keys:
+                            row.append(data[key][i])
+                        file = open(problem + "_" + analysis + '.csv', 'a')
+                        wr = csv.writer(file, delimiter=',')
+                        print row
+                        wr.writerow(row)
+                        file.close()
 
 
 def plot_results(problem, analysis):
@@ -114,7 +180,7 @@ def plot_results(problem, analysis):
     else:
         pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Cart-pole', 'max_likelihood_approx' : 'ML Standard Cart-pole', 'max_likelihood_big_discrete' : 'ML Tabular'}
     colors = {'true_model': 'g', 'pops' : 'b', 'max_likelihood_approx' : 'r', 'max_likelihood_big_discrete' : 'c'}
-    store = pandas.HDFStore(problem + "_" + analysis + '_store_run3.h5')
+    store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
 
     if analysis == 'misspecification':
         for par in list(set([pars[1] for pars in store['true_model']])):
@@ -159,7 +225,7 @@ def plot_results(problem, analysis):
             else:
                 plt.legend(loc=4)
                 plt.ylim((0,500))
-                plt.xlim((0,20000))
-                print "XLIM WAS MODIFIED!!!!"
+                #plt.xlim((0,20000))
+                #print "XLIM WAS MODIFIED!!!!"
 
     store.close()
