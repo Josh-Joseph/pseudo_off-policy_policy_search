@@ -13,10 +13,13 @@ INITSTATE = np.array([-np.pi / 2.0 / 3.0, 0.0])
 rnd_start = True
 print "[mountaincar]: Training random start is " + ("On" if rnd_start else "Off")
 
+grid_size = [500,250]
+print "[mountaincar]: Using a grid size of: " + str(grid_size)
+
 class Mountaincar(rl_tools.Domain):
     def __init__(self, input_pars):
         self.input_pars = input_pars
-        self.N_MC_eval_samples = 1
+        self.N_MC_eval_samples = 100
         self.episode_length = 500
         self.data_columns = ('x','xdot','u','r') # assume the 2nd to last is u and the last is r
         self.n_dim = 2
@@ -24,8 +27,8 @@ class Mountaincar(rl_tools.Domain):
         self.goal = np.array([[-np.inf, XMAX],[-np.inf, np.inf]]).transpose()
         self.initstate = INITSTATE
         self.action_centers = np.array([-1, 1])
-        self.n_x_centers = 300
-        self.n_xdot_centers = 300
+        self.n_x_centers = grid_size[0]
+        self.n_xdot_centers = grid_size[1]
         self.true_pars = (-0.0025, 3)
         self.initial_par_search_space = [[p1, p2] for p1 in np.linspace(-0.003, -.002, 5) for p2 in np.linspace(2, 4, 5)]
         self.noise = input_pars
@@ -38,6 +41,7 @@ class Mountaincar(rl_tools.Domain):
         self.dim_centers = rl_tools.split_states_on_dim(self.state_centers)
         self.pi_init = None
         self.training_data_random_start = rnd_start
+        self.start_distribution =  np.array([[INITSTATE[0]-.1, INITSTATE[0]+.1],[INITSTATE[1], INITSTATE[1]]]).transpose()
 
     def distance_fn(self, x1, x2):
         return np.sum(((x1-x2)/np.array([1.7, .14]))**2, axis=1)
@@ -72,7 +76,7 @@ class Mountaincar(rl_tools.Domain):
         if x >= -1.6:
             s[1] = min(max(xdot+0.001*u+(self.true_pars[0]*np.cos(self.true_pars[1]*x)) + slip, self.bounds[0,1]), self.bounds[1,1])
         else:
-            s[1] = min(max(xdot+0.001*u+(-0.0001*np.cos(self.true_pars[1]*x)) + slip, self.bounds[0,1]), self.bounds[1,1])
+            s[1] = min(max(xdot+0.001*u+(-0.01*np.cos(self.true_pars[1]*x)) + slip, self.bounds[0,1]), self.bounds[1,1])
         return s
 
     def true_dynamics_pmf(self, s_i, a_i):

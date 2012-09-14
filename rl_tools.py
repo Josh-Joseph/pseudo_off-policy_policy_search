@@ -247,6 +247,7 @@ class Domain:
         self.dim_centers = split_states_on_dim(self.state_centers)
         self.pi_init = None
         self.training_data_random_start = True
+        self.start_distribution = None
 
     def construct_discrete_policy_centers(self):
         if self.n_dim == 2:
@@ -288,7 +289,7 @@ class Domain:
     def simulate_episode(self, policy=None):
         np.random.seed(int(1e6*time.time()))
         episode_data = pandas.DataFrame(index=range(self.episode_length), columns=self.data_columns)
-        s = self.initstate.copy()
+        s = np.random.random(self.n_dim) * np.diff(self.start_distribution, axis=0)[0] + self.start_distribution[0,:]
         if policy is None: # create batch training data
             policy = discrete_policy(self)
             if self.training_data_random_start:
