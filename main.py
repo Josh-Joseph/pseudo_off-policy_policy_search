@@ -22,6 +22,9 @@ reload(cartpole)
 # .01 drag sig
 # .0025 mud drag constant in mountaincar
 
+file_type = '_store.h5'
+#file_type = '_store_run2.h5'
+
 
 def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
 
@@ -50,14 +53,15 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
             #all_drag_mu = [0, .01, .02, .03, .04, .05, .06, .07, .08, .09, .1] # muddy circle
             #all_drag_mu = [0, .01, .02, .03, .04, .05, .06, .07, .08, .09, .1] # muddy top of the right hill on x
             #all_drag_mu = [0, .001, .002, .003, .004, .005, .006, .007, .008, .009, .01] # muddy top of the right hill on xdot
-            all_drag_mu = [0, .005]#, .01, .015, .02, .025, .03, .035, .04, .045, .05] # % slip on xdot
+            all_drag_mu = [0, .005, .01, .015, .02, .025, .03, .035, .04, .045, .05] # % slip on xdot
+            #all_drag_mu = [0, .01, .02, .03, .04] # % slip on xdot
             #all_drag_mu = [0, .001, .005, .01,.05, .1, .15, .175, .2, .25, .3] # % slip on xdot
             all_drag_sig = [0]
-            all_n = [2000]
+            all_n = [2500]
         elif analysis == 'sample_complexity':
             # drag and noise on xdot
-            all_drag_mu = [.02] #np.arange(0,1.1,.1)
-            all_drag_sig = [.005]
+            all_drag_mu = [.015] #np.arange(0,1.1,.1)
+            all_drag_sig = [0]
             all_n = [50, 100, 250, 500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000]
         domains = [mountaincar.Mountaincar((drag_mu, drag_sig)) for drag_sig in all_drag_sig for drag_mu in all_drag_mu]
 
@@ -68,7 +72,7 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
         if trial < trial_start:
             continue
         for domain in domains:
-            if method != 'true_model':
+            if method != 'true_model' and method != 'best_model':
                 data = domain.generate_batch_data(N=np.max(all_n))
             for n in all_n:
                 if method == 'true_model':
@@ -88,7 +92,7 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
                 else:
                     raise Exception('Unknown policy learning method: ' + method)
                 result = domain.evaluate_policy(policy)
-                if problem + "_" + analysis + '_store.h5' in os.listdir('.'):
+                if problem + "_" + analysis + file_type in os.listdir('.'):
                     results = load_results(method, problem, analysis, domains, all_n, all_trials)
                 results[domain.input_pars][n, trial] = result
                 print str(domain.input_pars) + " - " + str(n) + " - " + str(results[domain.input_pars][n, trial])
@@ -97,13 +101,13 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
     return results
 
 def save_results(method, problem, analysis, results):
-    store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
+    store = pandas.HDFStore(problem + "_" + analysis + file_type)
     key = method # + ", " + datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
     store[key] = results
     store.close()
 
 def load_results(method, problem, analysis, domains, all_n, all_trials):
-    store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
+    store = pandas.HDFStore(problem + "_" + analysis + file_type)
     key = method # + ", " + datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
     if key in store.keys():
         results = store[key]
@@ -122,7 +126,7 @@ def write_data_to_csv():
                 pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Mountain Car', 'max_likelihood_approx' : 'ML Standard Mountain Car', 'max_likelihood_big_discrete' : 'ML Tabular'}
             else:
                 pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Cart-pole', 'max_likelihood_approx' : 'ML Standard Cart-pole', 'max_likelihood_big_discrete' : 'ML Tabular'}
-            store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
+            store = pandas.HDFStore(problem + "_" + analysis + file_type)
             if analysis == 'misspecification':
                 for par in list(set([pars[1] for pars in store['true_model']])):
                     data = {'n' : [str(pars[0]) for pars in store['true_model'] if pars[1] == par]}
@@ -184,7 +188,7 @@ def plot_results(problem, analysis):
     else:
         pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Cart-pole', 'max_likelihood_approx' : 'ML Standard Cart-pole', 'max_likelihood_big_discrete' : 'ML Tabular'}
     colors = {'true_model': 'g', 'pops' : 'b', 'max_likelihood_approx' : 'r', 'max_likelihood_big_discrete' : 'c'}
-    store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
+    store = pandas.HDFStore(problem + "_" + analysis + file_type)
 
     if analysis == 'misspecification':
         for par in list(set([pars[1] for pars in store['true_model']])):

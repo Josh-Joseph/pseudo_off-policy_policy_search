@@ -177,7 +177,8 @@ def hill_climb(fn, optimization_pars, ml_start=None):
     step = np.copy(optimization_pars['initial step size'])
     eval_record = {}
     new_inputs = []
-    new_inputs.append(np.copy(optimization_pars['start']))
+    for pars in optimization_pars['initial par search space']:
+        new_inputs.append(np.copy(pars))
     if ml_start is not None:
         new_inputs.append(ml_start)
     all_out = parallel.parmap(fn, [np.around(input, decimals=10) for input in new_inputs])

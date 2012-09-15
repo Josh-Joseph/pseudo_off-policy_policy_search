@@ -17,9 +17,10 @@ print "[pops]: p is " + str(p)
 #print "[pops]: p is adaptive with p_adaptive = " + str(p_adaptive)
 
 def best_policy(domain, data):
-    f = lambda pars: err_array(domain, pars, data)
-    pars0 = domain.true_pars
-    ml_start = leastsq(f, pars0)[0]
+    #f = lambda pars: err_array(domain, pars, data)
+    #pars0 = domain.true_pars
+    #ml_start = leastsq(f, pars0)[0]
+    ml_start = None
     if 1:
         f = lambda pars: [tuple(pars),  mfmc_evaluation(policy_wrt_approx_model(domain, pars), data, domain.distance_fn, domain.initstate, domain.episode_length, domain.at_goal)]
         pars = hill_climb(f, domain.optimization_pars, ml_start)

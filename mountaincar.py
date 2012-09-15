@@ -42,7 +42,8 @@ class Mountaincar(rl_tools.Domain):
         self.optimization_pars = {'initial step size':np.array([.0024, 1]),
                                   'start':np.array([-0.0025, 3]),
                                   'maximum evaluations':max_evals,
-                                  'only positive':False}
+                                  'only positive':False,
+                                  'initial par search space':[[p1, p2] for p1 in [-0.002,-0.0025,-0.003] for p2 in [2.5,3,3.5]]}
         self.state_centers = self.construct_discrete_policy_centers()
         self.dim_centers = rl_tools.split_states_on_dim(self.state_centers)
         self.pi_init = None
