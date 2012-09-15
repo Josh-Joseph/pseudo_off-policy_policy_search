@@ -16,6 +16,12 @@ print "[mountaincar]: Training random start is " + ("On" if rnd_start else "Off"
 grid_size = [500,250]
 print "[mountaincar]: Using a grid size of: " + str(grid_size)
 
+max_evals = 50
+print "[mountaincar]: Using maximum evaluations: " + str(max_evals)
+
+start_dist_size = .1
+print "[mountaincar]: Using a start dist size: " + str(start_dist_size)
+
 class Mountaincar(rl_tools.Domain):
     def __init__(self, input_pars):
         self.input_pars = input_pars
@@ -35,13 +41,13 @@ class Mountaincar(rl_tools.Domain):
         self.value_iteration_threshold = 1e-5
         self.optimization_pars = {'initial step size':np.array([.0024, 1]),
                                   'start':np.array([-0.0025, 3]),
-                                  'maximum evaluations':50,
+                                  'maximum evaluations':max_evals,
                                   'only positive':False}
         self.state_centers = self.construct_discrete_policy_centers()
         self.dim_centers = rl_tools.split_states_on_dim(self.state_centers)
         self.pi_init = None
         self.training_data_random_start = rnd_start
-        self.start_distribution =  np.array([[INITSTATE[0]-.2, INITSTATE[0]+.2],[INITSTATE[1], INITSTATE[1]]]).transpose()
+        self.start_distribution =  np.array([[INITSTATE[0]-start_dist_size, INITSTATE[0]+start_dist_size],[INITSTATE[1], INITSTATE[1]]]).transpose()
 
     def distance_fn(self, x1, x2):
         return np.sum(((x1-x2)/np.array([1.7, .14]))**2, axis=1)
