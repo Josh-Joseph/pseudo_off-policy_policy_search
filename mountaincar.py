@@ -13,7 +13,7 @@ INITSTATE = np.array([-np.pi / 2.0 / 3.0, 0.0])
 rnd_start = True
 print "[mountaincar]: Training random start is " + ("On" if rnd_start else "Off")
 
-grid_size = [500,300]
+grid_size = [450,300]
 print "[mountaincar]: Using a grid size of: " + str(grid_size)
 
 class Mountaincar(rl_tools.Domain):
@@ -41,7 +41,7 @@ class Mountaincar(rl_tools.Domain):
         self.dim_centers = rl_tools.split_states_on_dim(self.state_centers)
         self.pi_init = None
         self.training_data_random_start = rnd_start
-        self.start_distribution =  np.array([[INITSTATE[0]-.1, INITSTATE[0]+.1],[INITSTATE[1], INITSTATE[1]]]).transpose()
+        self.start_distribution =  np.array([[INITSTATE[0]-.2, INITSTATE[0]+.2],[INITSTATE[1], INITSTATE[1]]]).transpose()
 
     def distance_fn(self, x1, x2):
         return np.sum(((x1-x2)/np.array([1.7, .14]))**2, axis=1)
