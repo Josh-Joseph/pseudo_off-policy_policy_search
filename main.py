@@ -54,6 +54,8 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
             #all_drag_mu = [0, .01, .02, .03, .04, .05, .06, .07, .08, .09, .1] # muddy top of the right hill on x
             #all_drag_mu = [0, .001, .002, .003, .004, .005, .006, .007, .008, .009, .01] # muddy top of the right hill on xdot
             all_drag_mu = [0, .005, .01, .015, .02, .025, .03, .035, .04, .045, .05] # % slip on xdot
+            #all_drag_mu = [.005, .01, .015, .02, .025, .03, .035, .04, .045, .05] # % slip on xdot
+            #print all_drag_mu
             #all_drag_mu = [0, .01, .02, .03, .04] # % slip on xdot
             #all_drag_mu = [0, .001, .005, .01,.05, .1, .15, .175, .2, .25, .3] # % slip on xdot
             all_drag_sig = [0]

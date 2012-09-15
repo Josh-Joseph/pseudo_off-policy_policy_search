@@ -19,13 +19,13 @@ print "[mountaincar]: Using a grid size of: " + str(grid_size)
 max_evals = 50
 print "[mountaincar]: Using maximum evaluations: " + str(max_evals)
 
-start_dist_size = 0
+start_dist_size = .1
 print "[mountaincar]: Using a start dist size: " + str(start_dist_size)
 
 class Mountaincar(rl_tools.Domain):
     def __init__(self, input_pars):
         self.input_pars = input_pars
-        self.N_MC_eval_samples = 1
+        self.N_MC_eval_samples = 50
         self.episode_length = 500
         self.data_columns = ('x','xdot','u','r') # assume the 2nd to last is u and the last is r
         self.n_dim = 2
