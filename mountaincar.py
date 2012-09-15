@@ -13,7 +13,7 @@ INITSTATE = np.array([-np.pi / 2.0 / 3.0, 0.0])
 rnd_start = True
 print "[mountaincar]: Training random start is " + ("On" if rnd_start else "Off")
 
-grid_size = [450,300]
+grid_size = [450,250]
 print "[mountaincar]: Using a grid size of: " + str(grid_size)
 
 class Mountaincar(rl_tools.Domain):
