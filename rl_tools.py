@@ -211,7 +211,7 @@ def hill_climb(fn, optimization_pars, ml_start=None):
 def best_policy(domain):
     f = lambda pars: [tuple(pars), domain.evaluate_policy(policy_wrt_approx_model(domain, pars))]
     pars = hill_climb(f, domain.optimization_pars)
-    #print pars
+    print pars
     #if 1:
     #    raw_returns = parallel.largeparmap(f, domain.initial_par_search_space)
     #else:
