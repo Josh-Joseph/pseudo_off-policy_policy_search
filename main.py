@@ -62,6 +62,8 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
         domains = [mountaincar.Mountaincar((drag_mu, drag_sig)) for drag_sig in all_drag_sig for drag_mu in all_drag_mu]
 
     print "[main.evaluate_approach]: Evaluating the performance of " + method + " ..."
+    index = pandas.MultiIndex.from_tuples([(n, trial) for n in all_n for trial in all_trials])
+    results = pandas.DataFrame(index=index, columns=[domain.input_pars for domain in domains])
     for trial in all_trials:
         if trial < trial_start:
             continue
