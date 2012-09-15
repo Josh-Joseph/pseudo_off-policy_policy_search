@@ -62,8 +62,6 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
         domains = [mountaincar.Mountaincar((drag_mu, drag_sig)) for drag_sig in all_drag_sig for drag_mu in all_drag_mu]
 
     print "[main.evaluate_approach]: Evaluating the performance of " + method + " ..."
-    index = pandas.MultiIndex.from_tuples([(n, trial) for n in all_n for trial in all_trials])
-    results = pandas.DataFrame(index=index, columns=[domain.input_pars for domain in domains])
     for trial in all_trials:
         if trial < trial_start:
             continue
@@ -89,7 +87,7 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
                     raise Exception('Unknown policy learning method: ' + method)
                 result = domain.evaluate_policy(policy)
                 if problem + "_" + analysis + '_store.h5' in os.listdir('.'):
-                    results = load_results(method, problem, analysis)
+                    results = load_results(method, problem, analysis, domains, all_n, all_trials)
                 results[domain.input_pars][n, trial] = result
                 print str(domain.input_pars) + " - " + str(n) + " - " + str(results[domain.input_pars][n, trial])
                 if save_it:
@@ -102,10 +100,14 @@ def save_results(method, problem, analysis, results):
     store[key] = results
     store.close()
 
-def load_results(method, problem, analysis):
+def load_results(method, problem, analysis, domains, all_n, all_trials):
     store = pandas.HDFStore(problem + "_" + analysis + '_store.h5')
     key = method # + ", " + datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
-    results = store[key]
+    if key in store.keys():
+        results = store[key]
+    else:
+        index = pandas.MultiIndex.from_tuples([(n, trial) for n in all_n for trial in all_trials])
+        results = pandas.DataFrame(index=index, columns=[domain.input_pars for domain in domains])
     store.close()
     return results
 
