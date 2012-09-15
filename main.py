@@ -4,6 +4,7 @@ import os
 from datetime import datetime
 import matplotlib.pyplot as plt
 import parallel
+import pickle
 import rl_tools
 import mountaincar
 import cartpole
@@ -22,8 +23,9 @@ reload(cartpole)
 # .01 drag sig
 # .0025 mud drag constant in mountaincar
 
-file_type = '_store.h5'
+#file_type = '_store.h5'
 #file_type = '_store_run2.h5'
+file_type = '.pkl'
 
 
 def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
@@ -103,13 +105,19 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
     return results
 
 def save_results(method, problem, analysis, results):
-    store = pandas.HDFStore(problem + "_" + analysis + file_type)
+    #store = pandas.HDFStore(problem + "_" + analysis + file_type)
+    f = open(problem + "_" + analysis + file_type, 'w')
+    store = pickle.load(f)
     key = method # + ", " + datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
     store[key] = results
+    pickle.dump(store,f)
     store.close()
 
 def load_results(method, problem, analysis, domains, all_n, all_trials):
-    store = pandas.HDFStore(problem + "_" + analysis + file_type)
+    #store = pandas.HDFStore(problem + "_" + analysis + file_type)
+    f = open(problem + "_" + analysis + file_type, 'r')
+    store = pickle.load(f)
+    store.close()
     key = method # + ", " + datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
     if key in store.keys():
         results = store[key]
