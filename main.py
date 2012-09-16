@@ -23,9 +23,9 @@ reload(cartpole)
 # .01 drag sig
 # .0025 mud drag constant in mountaincar
 
-#file_type = '_store.h5'
+file_type = '_store.h5'
 #file_type = '_store_run2.h5'
-file_type = '.pkl'
+#file_type = '.pkl'
 
 
 def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
@@ -67,6 +67,7 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
             all_drag_mu = [.015] #np.arange(0,1.1,.1)
             all_drag_sig = [0]
             all_n = [50, 100, 250, 500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000]
+            #all_n = [50, 100]
         domains = [mountaincar.Mountaincar((drag_mu, drag_sig)) for drag_sig in all_drag_sig for drag_mu in all_drag_mu]
 
     print "[main.evaluate_approach]: Evaluating the performance of " + method + " ..."
@@ -96,7 +97,7 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
                 else:
                     raise Exception('Unknown policy learning method: ' + method)
                 result = domain.evaluate_policy(policy)
-                if problem + "_" + analysis + file_type in os.listdir('.'):
+                if problem + "_" + analysis + "_" + method + file_type in os.listdir('.'):
                     results = load_results(method, problem, analysis, domains, all_n, all_trials)
                 results[domain.input_pars][n, trial] = result
                 print str(domain.input_pars) + " - " + str(n) + " - " + str(results[domain.input_pars][n, trial])
@@ -105,19 +106,18 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
     return results
 
 def save_results(method, problem, analysis, results):
-    #store = pandas.HDFStore(problem + "_" + analysis + file_type)
-    f = open(problem + "_" + analysis + file_type, 'w')
-    store = pickle.load(f)
+    store = pandas.HDFStore(problem + "_" + analysis + "_" + method + file_type)
+    #f = open(problem + "_" + analysis + file_type, 'w')
+    #store = pickle.load(f)
     key = method # + ", " + datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
     store[key] = results
-    pickle.dump(store,f)
+    #pickle.dump(store,f)
     store.close()
 
 def load_results(method, problem, analysis, domains, all_n, all_trials):
-    #store = pandas.HDFStore(problem + "_" + analysis + file_type)
-    f = open(problem + "_" + analysis + file_type, 'r')
-    store = pickle.load(f)
-    store.close()
+    store = pandas.HDFStore(problem + "_" + analysis + "_" + method + file_type)
+    #f = open(problem + "_" + analysis + file_type, 'r')
+    #store = pickle.load(f)
     key = method # + ", " + datetime.now().strftime('%Y-%m-%d_%H:%M:%S')
     if key in store.keys():
         results = store[key]
