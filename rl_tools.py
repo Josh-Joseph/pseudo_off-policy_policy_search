@@ -163,13 +163,21 @@ def policy_wrt_true_model(domain):
     states_to_actions, V = value_iteration(T, domain.state_centers, domain.reward, threshold=domain.value_iteration_threshold)
     return discrete_policy(domain, states_to_actions)
 
-def err_array(domain, pars, data):
-    err = []
-    for i in range(len(data)): # for i in set([i for i,j in data.index]):
-        episode_values = data[i].values.copy() # episode_values = data.ix[i].values.copy()
-        for j in range(domain.episode_length):
-            if not np.isnan(episode_values[j,0]) and j != domain.episode_length-1 and not np.isnan(episode_values[j+1,0]):
-                err.append(np.sum(np.array([domain.approx_dynamics(episode_values[j,:domain.n_dim], episode_values[j,domain.n_dim], pars)-episode_values[j+1,:domain.n_dim]])**2))
+def err_array(domain, pars, data, trim=False):
+    if trim:
+        err = []
+        for i in range(len(data)): # for i in set([i for i,j in data.index]):
+            episode_values = data[i].values.copy() # episode_values = data.ix[i].values.copy()
+            for j in range(domain.episode_length):
+                if not np.isnan(episode_values[j,0]) and episode_values[j,0] >= -1.2 and j != domain.episode_length-1 and not np.isnan(episode_values[j+1,0]):
+                    err.append(np.sum(np.array([domain.approx_dynamics(episode_values[j,:domain.n_dim], episode_values[j,domain.n_dim], pars)-episode_values[j+1,:domain.n_dim]])**2))
+    else:
+        err = []
+        for i in range(len(data)): # for i in set([i for i,j in data.index]):
+            episode_values = data[i].values.copy() # episode_values = data.ix[i].values.copy()
+            for j in range(domain.episode_length):
+                if not np.isnan(episode_values[j,0]) and j != domain.episode_length-1 and not np.isnan(episode_values[j+1,0]):
+                    err.append(np.sum(np.array([domain.approx_dynamics(episode_values[j,:domain.n_dim], episode_values[j,domain.n_dim], pars)-episode_values[j+1,:domain.n_dim]])**2))
     return err
 
 def hill_climb(fn, optimization_pars, ml_start=None):

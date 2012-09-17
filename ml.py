@@ -2,8 +2,8 @@ from rl_tools import deterministic_continuous_to_discrete_model,value_iteration,
 from scipy.optimize import leastsq
 
 
-def approx_model_policy(domain, data):
-    f = lambda pars: err_array(domain, pars, data)
+def approx_model_policy(domain, data, trim=False):
+    f = lambda pars: err_array(domain, pars, data, trim)
     pars0 = domain.true_pars
     pars = leastsq(f, pars0)[0]
     #print pars

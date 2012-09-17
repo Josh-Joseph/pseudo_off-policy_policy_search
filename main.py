@@ -64,7 +64,7 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
             all_n = [2500]
         elif analysis == 'sample_complexity':
             # drag and noise on xdot
-            all_drag_mu = [.015] #np.arange(0,1.1,.1)
+            all_drag_mu = [.005] #np.arange(0,1.1,.1)
             all_drag_sig = [0]
             all_n = [50, 100, 250, 500, 750, 1000, 1500, 2000, 2500, 3000, 4000, 5000]
             #all_n = [50, 100]
@@ -92,6 +92,8 @@ def evaluate_approach(method, problem, analysis, save_it=False, trial_start=0):
                     policy = pops.best_policy(domain, data[:n])
                 elif method == 'max_likelihood_approx':
                     policy = ml.approx_model_policy(domain, data[:n])
+                elif method == 'max_likelihood_approx_trim':
+                    policy = ml.approx_model_policy(domain, data[:n], trim=True)
                 elif method == 'max_likelihood_big_discrete':
                     policy = ml.discrete_model_policy(domain, data[:n])
                 else:
@@ -129,26 +131,39 @@ def load_results(method, problem, analysis, domains, all_n, all_trials):
 
 def write_data_to_csv():
     all_analysis = {'misspecification','sample_complexity'}
-    all_problems = {'mountaincar','cartpole'}
+    all_problems = {'mountaincar'}#,'cartpole'}
     for analysis in all_analysis:
         for problem in all_problems:
             if problem == 'mountaincar':
-                pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Mountain Car', 'max_likelihood_approx' : 'ML Standard Mountain Car', 'max_likelihood_big_discrete' : 'ML Tabular'}
+                pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Mountain Car', 'max_likelihood_approx' : 'ML Standard Mountain Car', 'max_likelihood_big_discrete' : 'ML Tabular', 'max_likelihood_approx_trim' : 'ML Trimmed Standard Mountain Car',}
             else:
                 pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Cart-pole', 'max_likelihood_approx' : 'ML Standard Cart-pole', 'max_likelihood_big_discrete' : 'ML Tabular'}
-            store = pandas.HDFStore(problem + "_" + analysis + file_type)
+            all_methods = pretty_labels.keys()
+            method = 'true_model'
+            store = pandas.HDFStore(problem + "_" + analysis + "_" + method + file_type)
+            all_index = [pars for pars in store['true_model']]
+            store.close()
             if analysis == 'misspecification':
-                for par in list(set([pars[1] for pars in store['true_model']])):
+                for par in list(set([pars[1] for pars in all_index])):
+                    store = pandas.HDFStore(problem + "_" + analysis + "_" + 'true_model' + file_type)
                     data = {'n' : [str(pars[0]) for pars in store['true_model'] if pars[1] == par]}
-                    for key in store.keys():
-                        x = [pars[0] for pars in store['true_model'] if pars[1] == par]
+                    store.close()
+                    for key in all_methods:
+                        if key == 'max_likelihood_big_discrete':
+                            continue
+                        store = pandas.HDFStore(problem + "_" + analysis + "_" + key + file_type)
+                        x = [pars[0] for pars in store[key] if pars[1] == par]
                         data[pretty_labels[key] + '_mu'] = [str(np.around(store[key][(xx, par)].mean(), decimals=2)) for xx in x]
                         data[pretty_labels[key] + '_stderr'] = [str(np.around(store[key][(xx, par)].std()/np.sqrt(len(store[key][(xx, par)])), decimals=2)) for xx in x]
-                    keys = data.keys()
-                    keys.sort()
-                    print keys
-                    keys[1:] = keys[:-1]
-                    keys[0] = 'n'
+                        store.close()
+                    #keys = data.keys()
+                    #keys.sort()
+                    #print keys
+                    #keys[1:] = keys[:-1]
+                    #keys[0] = 'n'
+                    #print keys
+                    keys = ['n', 'True Model_mu', 'POPS Standard Mountain Car_mu', 'ML Standard Mountain Car_mu', 'ML Trimmed Standard Mountain Car_mu', 'True Model_stderr', 'POPS Standard Mountain Car_stderr', 'ML Standard Mountain Car_stderr', 'ML Trimmed Standard Mountain Car_stderr']
+                    #keys = ['n', 'True Model_mu', 'POPS Standard Cart-pole_mu', 'ML Standard Cart-pole_mu', 'True Model_stderr', 'POPS Standard Cart-pole_stderr', 'ML Standard Cart-pole_stderr']
                     print keys
                     file = open(problem + "_" + analysis + '.csv', 'w')
                     wr = csv.writer(file, delimiter=',')
@@ -165,59 +180,77 @@ def write_data_to_csv():
                         wr.writerow(row)
                         file.close()
             elif analysis == 'sample_complexity':
+                store = pandas.HDFStore(problem + "_" + analysis + "_" + method + file_type)
                 data = {'n' : [str(n) for n in np.sort(list(set([pars[0] for pars in store['true_model'].index])))]}
-                for key in store.keys():
+                store.close()
+                for key in all_methods:
+                    if key == 'max_likelihood_approx_trim':
+                        continue
+                    store = pandas.HDFStore(problem + "_" + analysis + "_" + key + file_type)
                     x = np.sort(list(set([pars[0] for pars in store[key].index])))
                     data[pretty_labels[key] + '_mu'] = [str(np.around(store[key].ix[i].mean().values[0], decimals=2)) for i in x]
                     data[pretty_labels[key] + '_stderr'] = [str(np.around(store[key].ix[i].std().values[0]/np.sqrt(len(store[key].ix[i].values)), decimals=2)) for i in x]
-                    keys = data.keys()
-                    keys.sort()
-                    print keys
-                    keys[1:] = keys[:-1]
-                    keys[0] = 'n'
-                    print keys
-                    file = open(problem + "_" + analysis + '.csv', 'w')
+                    store.close()
+                #keys = data.keys()
+                #keys.sort()
+                #print keys
+                #keys[1:] = keys[:-1]
+                #keys[0] = 'n'
+                #print keys
+                keys = ['n', 'True Model_mu', 'POPS Standard Mountain Car_mu', 'ML Standard Mountain Car_mu', 'ML Tabular_mu', 'True Model_stderr', 'POPS Standard Mountain Car_stderr', 'ML Standard Mountain Car_stderr', 'ML Tabular_stderr']
+                #keys = ['n', 'True Model_mu', 'POPS Standard Cart-pole_mu', 'ML Standard Cart-pole_mu', 'ML Tabular_mu', 'True Model_stderr', 'POPS Standard Cart-pole_stderr', 'ML Standard Cart-pole_stderr', 'ML Tabular_stderr']
+                print keys
+                file = open(problem + "_" + analysis + '.csv', 'w')
+                wr = csv.writer(file, delimiter=',')
+                row = deepcopy(keys)
+                wr.writerow(row)
+                file.close()
+                for i in range(len(data[keys[0]])):
+                    row = []
+                    for key in keys:
+                        row.append(data[key][i])
+                    file = open(problem + "_" + analysis + '.csv', 'a')
                     wr = csv.writer(file, delimiter=',')
-                    row = deepcopy(keys)
+                    print row
                     wr.writerow(row)
                     file.close()
-                    for i in range(len(data[keys[0]])):
-                        row = []
-                        for key in keys:
-                            row.append(data[key][i])
-                        file = open(problem + "_" + analysis + '.csv', 'a')
-                        wr = csv.writer(file, delimiter=',')
-                        print row
-                        wr.writerow(row)
-                        file.close()
 
 
 def plot_results(problem, analysis):
     if problem == 'mountaincar':
-        pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Mountain Car', 'max_likelihood_approx' : 'ML Standard Mountain Car', 'max_likelihood_big_discrete' : 'ML Tabular'}
+        pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Mountain Car', 'max_likelihood_approx' : 'ML Mountain Car', 'max_likelihood_approx_trim' : 'ML Trimmed Mountain Car', 'max_likelihood_big_discrete' : 'ML Tabular'}
     else:
         pretty_labels = {'true_model': 'True Model', 'pops' : 'POPS Standard Cart-pole', 'max_likelihood_approx' : 'ML Standard Cart-pole', 'max_likelihood_big_discrete' : 'ML Tabular'}
-    colors = {'true_model': 'g', 'pops' : 'b', 'max_likelihood_approx' : 'r', 'max_likelihood_big_discrete' : 'c'}
-    store = pandas.HDFStore(problem + "_" + analysis + file_type)
+    colors = {'true_model': 'r', 'pops' : 'y', 'max_likelihood_approx' : 'b', 'max_likelihood_big_discrete' : 'g', 'max_likelihood_approx_trim' : 'c'}
+
+    all_methods = pretty_labels.keys()
+    method = 'true_model'
+    store = pandas.HDFStore(problem + "_" + analysis + "_" + method + file_type)
+    all_index = [pars for pars in store['true_model']]
+    store.close()
 
     if analysis == 'misspecification':
-        for par in list(set([pars[1] for pars in store['true_model']])):
-            plt.figure()
-            for key in store.keys():
-                x = [pars[0] for pars in store['true_model'] if pars[1] == par]
+        plt.figure()
+        for par in list(set([pars[1] for pars in all_index])):
+            for key in all_methods:
+                if key == 'max_likelihood_big_discrete':
+                    continue
+                store = pandas.HDFStore(problem + "_" + analysis + "_" + key + file_type)
+                x = [pars[0] for pars in store[key] if pars[1] == par]
                 y = [store[key][(xx, par)].mean() for xx in x]
                 #if key == 'true_model':
                 #    plt.plot(x, y, linewidth=2, label=key)
                 #else:
                 yerr = np.array([store[key][(xx, par)].std()/np.sqrt(len(store[key][(xx, par)])) for xx in x])
                 plt.errorbar(x, y, yerr=yerr, linewidth=2, color=colors[key], label=pretty_labels[key])
+                store.close()
             #plt.title("Performance vs Model Misspecification")
             plt.ylabel('Average Total Reward')
             if problem == 'mountaincar':
                 plt.xlabel('Influence of the Rock (c)')
-                plt.legend()
+                plt.legend(loc=6)
                 plt.xlim((0,.05))
-                plt.ylim((-500,0))
+                plt.ylim((-550,-50))
             else:
                 plt.xlabel('Influence of the Wind (f)')
                 plt.legend()
@@ -225,7 +258,10 @@ def plot_results(problem, analysis):
                 plt.ylim((0,500))
     elif analysis == 'sample_complexity':
         plt.figure()
-        for key in store.keys():
+        for key in all_methods:
+            if key == 'max_likelihood_approx_trim':
+                continue
+            store = pandas.HDFStore(problem + "_" + analysis + "_" + key + file_type)
             x = np.sort(list(set([pars[0] for pars in store[key].index])))
             #if key == 'true_model':
             #    y = [np.mean(store[key].values) for i in x]
@@ -234,12 +270,13 @@ def plot_results(problem, analysis):
             y = [store[key].ix[i].mean().values[0] for i in x]
             yerr = [store[key].ix[i].std().values[0]/np.sqrt(len(store[key].ix[i].values)) for i in x]
             plt.errorbar(x, y, yerr=yerr, linewidth=2, color=colors[key], label=pretty_labels[key])
+            store.close()
             #plt.title("Performance vs Training Data Size")
             plt.xlabel('Episodes of Training Data')
             plt.ylabel('Average Total Reward')
             if problem == 'mountaincar':
-                plt.legend(loc=4)
-                plt.ylim((-500,-100))
+                plt.legend(loc=7)
+                plt.ylim((-550,-100))
             else:
                 plt.legend(loc=4)
                 plt.ylim((0,500))
